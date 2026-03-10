@@ -2,6 +2,8 @@ import { Lead, SearchFilters } from '../types';
 import { MOCK_LEADS } from '../data/mockLeads';
 import { supabase } from '../lib/supabaseClient';
 
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true' || !supabase;
+
 export const leadService = {
   searchLeads: async (filters: SearchFilters): Promise<Lead[]> => {
     // Simulate AI powered search with the filters
@@ -9,6 +11,8 @@ export const leadService = {
     
     // In a real AI implementation, this would call an LLM to generate these leads
     // For now, we filter and randomize our base mock data to simulate "finding" leads
+    const savedIds = USE_MOCK ? JSON.parse(localStorage.getItem('saved_leads_mock') || '[]').map((l: any) => l.id) : [];
+
     return MOCK_LEADS.filter(lead => {
       let matches = true;
       if (filters.industry) {
@@ -21,10 +25,15 @@ export const leadService = {
     }).map(lead => ({
       ...lead,
       id: crypto.randomUUID(), // Generate fresh IDs to simulate new discovery
+      isSaved: USE_MOCK ? savedIds.includes(lead.id) : false,
     }));
   },
 
   getSavedLeads: async (): Promise<Lead[]> => {
+    if (USE_MOCK) {
+      return JSON.parse(localStorage.getItem('saved_leads_mock') || '[]');
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
@@ -38,7 +47,7 @@ export const leadService = {
       return [];
     }
 
-    return (data || []).map(item => ({
+    return (data || []).map((item: any) => ({
       id: item.id,
       companyName: item.company_name || '',
       industry: item.industry || '',
@@ -60,6 +69,15 @@ export const leadService = {
   },
 
   saveLead: async (lead: Lead) => {
+    if (USE_MOCK) {
+      const saved = JSON.parse(localStorage.getItem('saved_leads_mock') || '[]');
+      if (!saved.find((l: any) => l.id === lead.id)) {
+        saved.push({ ...lead, isSaved: true });
+        localStorage.setItem('saved_leads_mock', JSON.stringify(saved));
+      }
+      return;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User must be logged in to save leads');
 
@@ -78,6 +96,13 @@ export const leadService = {
   },
 
   removeLead: async (leadId: string) => {
+    if (USE_MOCK) {
+      const saved = JSON.parse(localStorage.getItem('saved_leads_mock') || '[]');
+      const filtered = saved.filter((l: any) => l.id !== leadId);
+      localStorage.setItem('saved_leads_mock', JSON.stringify(filtered));
+      return;
+    }
+
     const { error } = await supabase
       .from('saved_leads')
       .delete()
@@ -87,6 +112,16 @@ export const leadService = {
   },
 
   updateLead: async (updatedLead: Lead) => {
+    if (USE_MOCK) {
+      const saved = JSON.parse(localStorage.getItem('saved_leads_mock') || '[]');
+      const idx = saved.findIndex((l: any) => l.id === updatedLead.id);
+      if (idx !== -1) {
+        saved[idx] = updatedLead;
+        localStorage.setItem('saved_leads_mock', JSON.stringify(saved));
+      }
+      return;
+    }
+
     const { error } = await supabase
       .from('saved_leads')
       .update({
