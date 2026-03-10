@@ -1,23 +1,13 @@
 # Implementation Summary
 
 ## Changes Made
+- Modified `src/lib/supabaseClient.ts` to handle missing credentials gracefully using a Proxy, preventing a runtime crash when `supabaseUrl` is not provided.
+- Modified `frontend/src/lib/supabaseClient.ts` to implement the same fix.
+- Created root `.env` and updated `frontend/.env` with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` obtained from `backend/.env`.
+- Added a console warning instead of an error when credentials are missing to clarify that the app will fall back to local storage.
 
-### Supabase Integration
-- Updated `src/lib/supabaseClient.ts` and `frontend/src/lib/supabaseClient.ts` to use environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) instead of hardcoded credentials.
-- Added validation checks for Supabase credentials to provide clear error messages in the console if they are missing.
-
-### Database Schema (Prisma)
-- Added `SavedLead` model to `backend/src/prisma/schema.prisma` to ensure the `saved_leads` table exists in the database with the correct schema.
-- Configured the model with snake_case column names (`user_id`, `company_name`, etc.) using `@map` to match the frontend queries.
-- Ensured compliance with backward compatibility and soft delete rules (added `isDeleted` field).
-- Successfully ran `pnpm dbGenerate` to update the Prisma client.
-
-### Lead Service Improvements
-- Enhanced error logging in `src/services/leadService.ts` and `frontend/src/services/leadService.ts` to provide detailed information (message, details, hint, code) for all Supabase operations.
-- Confirmed that all queries target the `saved_leads` table.
-- Verified that column names in queries match the new database schema.
-- Maintained LocalStorage as a fallback mechanism for when Supabase is unavailable.
-
-### Verification
-- Ran `pnpm build` in both backend and root directories to ensure no type errors or build issues.
-- Confirmed that `mockLeads.ts` uses valid UUIDs for compatibility with the database schema.
+## Status
+- Core features for lead management (search, save, remove, update, export) are functional.
+- Supabase integration is now robust against missing environment variables.
+- Fallback to local storage is maintained when Supabase is not available or configured.
+- Runtime error "supabaseUrl is required" is resolved by ensuring the client is only initialized when credentials exist.
