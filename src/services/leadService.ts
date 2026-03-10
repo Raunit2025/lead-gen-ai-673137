@@ -30,7 +30,7 @@ export const leadService = {
 
     const { data, error } = await supabase
       .from('saved_leads')
-      .select('*')
+      .select('id, user_id, company_name, industry, website, email, linkedin, generated_email, created_at')
       .eq('user_id', user.id);
 
     if (error) {
@@ -40,23 +40,22 @@ export const leadService = {
 
     return (data || []).map(item => ({
       id: item.id,
-      companyName: item.company_name,
-      industry: item.industry,
-      website: item.website,
-      contactEmail: item.email,
-      linkedInUrl: item.linkedin,
-      role: item.role,
-      location: item.location,
-      companySize: item.company_size,
+      companyName: item.company_name || '',
+      industry: item.industry || '',
+      website: item.website || '',
+      contactEmail: item.email || '',
+      linkedInUrl: item.linkedin || '',
+      role: 'Lead', // Default as it's not in the schema
+      location: 'Global', // Default as it's not in the schema
+      companySize: 'SMB', // Default as it's not in the schema
       isSaved: true,
-      enrichment: item.enrichment,
       generatedEmails: item.generated_email ? [{
-        id: 'imported',
+        id: crypto.randomUUID(),
         type: 'email',
         content: item.generated_email,
         createdAt: item.created_at
       }] : [],
-      generatedLinkedIn: item.generated_linkedin || []
+      generatedLinkedIn: [] // Not in the schema
     }));
   },
 
@@ -72,12 +71,7 @@ export const leadService = {
       website: lead.website,
       email: lead.contactEmail,
       linkedin: lead.linkedInUrl,
-      role: lead.role,
-      location: lead.location,
-      company_size: lead.companySize,
-      enrichment: lead.enrichment,
-      generated_email: lead.generatedEmails?.[0]?.content || '',
-      generated_linkedin: lead.generatedLinkedIn
+      generated_email: lead.generatedEmails?.[0]?.content || ''
     });
 
     if (error) throw error;
@@ -101,12 +95,7 @@ export const leadService = {
         website: updatedLead.website,
         email: updatedLead.contactEmail,
         linkedin: updatedLead.linkedInUrl,
-        role: updatedLead.role,
-        location: updatedLead.location,
-        company_size: updatedLead.companySize,
-        enrichment: updatedLead.enrichment,
-        generated_email: updatedLead.generatedEmails?.[0]?.content || '',
-        generated_linkedin: updatedLead.generatedLinkedIn
+        generated_email: updatedLead.generatedEmails?.[0]?.content || ''
       })
       .eq('id', updatedLead.id);
 
