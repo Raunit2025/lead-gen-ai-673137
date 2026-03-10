@@ -58,9 +58,36 @@ export const saveLead = catchAsync(async (c) => {
         }
         else {
             // Doesn't exist, create with provided ID
-            lead = await prisma.savedLead.create({
-                data: { ...leadData, id }
-            });
+            try {
+                lead = await prisma.savedLead.create({
+                    data: { ...leadData, id }
+                });
+            }
+            catch (error) {
+                // Handle race condition where another request might have created it
+                if (error.code === 'P2002') {
+                    // Check ownership of the lead that was just created
+                    const existing = await prisma.savedLead.findUnique({
+                        where: { id }
+                    });
+                    if (existing && existing.userId === userId) {
+                        // It belongs to us, update it
+                        lead = await prisma.savedLead.update({
+                            where: { id },
+                            data: { ...leadData, updatedAt: new Date() }
+                        });
+                    }
+                    else {
+                        // Collision or belongs to someone else, create with fresh ID
+                        lead = await prisma.savedLead.create({
+                            data: { ...leadData, id: undefined }
+                        });
+                    }
+                }
+                else {
+                    throw error;
+                }
+            }
         }
     }
     else {
