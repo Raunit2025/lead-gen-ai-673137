@@ -2,29 +2,20 @@
 
 ## Changes Made
 
-### Frontend Refactoring
-- Removed all direct dependencies on `@supabase/supabase-js` from the frontend to comply with project mandates.
-- Updated `authService.ts` and `leadService.ts` in both root `src/` and `frontend/src/` to use the backend API instead of direct Supabase calls.
-- Implemented `mock data` fallback in services when `VITE_USE_MOCK_DATA` is set to "true".
-- Refactored `App.tsx` and `useAuth` hook to use `authService` for session management.
-- Overwrote `supabaseClient.ts` with a dummy proxy to prevent runtime initialization errors and discourage future usage.
-- Fixed a syntax error in `src/services/leadService.ts` where the `exportToCSV` method was duplicated.
+### Backend
+- **Lead Controller**: 
+  - Updated `getSavedLeads`, `removeLead`, and `updateLead` to strictly filter by `isDeleted: false`.
+  - Improved `saveLead` logic to validate incoming IDs. If the ID is not a valid UUID, it now creates a new record instead of attempting an `upsert` with an invalid ID, which was the likely cause of the 400 error.
+- **User Service**:
+  - Added `isDeleted: false` filters to all user retrieval and authentication methods (`getUserById`, `getUserByEmail`, `authenticateWithEmailPassword`, etc.) to adhere to the soft delete policy.
+- **Prisma**: Generated updated Prisma client.
 
-### Backend Enhancements
-- Created `SavedLead` model in Prisma schema to support lead persistence.
-- Implemented `leadController.ts` with CRUD operations for saved leads (Get, Save, Update, Delete).
-- Created `lead.routes.ts` to expose lead endpoints with authentication protection.
-- Registered lead routes in the main `app.ts`.
-- Generated Prisma client to include the new `SavedLead` model and soft-delete filters.
+### Frontend
+- **Lead Service**:
+  - Enhanced error logging in `getSavedLeads`, `saveLead`, `removeLead`, and `updateLead` to capture and display detailed error messages from the backend response.
+  - Added warnings when falling back to local storage due to backend fetch failures.
 
-### Verification
-- Ran `pnpm build` successfully, ensuring no TypeScript or build errors in the frontend.
-- Verified backend Prisma client generation.
-
-## Features Implemented
-- **AI-Powered Prospecting**: Frontend UI for searching leads with filters.
-- **Lead Enrichment**: Simulated AI analysis for company pain points and sales angles.
-- **Outreach Generation**: AI-generated email and LinkedIn messages.
-- **Persistent Lead Management**: Saving, updating, and removing leads via backend database with LocalStorage fallback.
-- **Secure Authentication**: Backend-driven auth flow (Login/Register) replacing direct Supabase Auth.
-- **CSV Export**: Ability to export saved leads to a CSV file.
+## Features Verified
+- **Lead Discovery**: Search results are correctly filtered and marked as saved/unsaved.
+- **Lead Management**: Saving, updating, and removing leads now correctly interacts with the backend with proper UUID validation and soft delete handling.
+- **Error Handling**: Detailed error messages are now visible in the console if a backend request fails, aiding in future diagnostics.

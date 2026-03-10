@@ -10,8 +10,8 @@ import bcrypt from 'bcrypt';
  * Find or create user - modified to support simpler schema
  */
 export async function getUserById(userId: string): Promise<User | null> {
-    return await prisma.user.findUnique({
-        where: { id: userId }
+    return await prisma.user.findFirst({
+        where: { id: userId, isDeleted: false }
     });
 }
 
@@ -19,8 +19,8 @@ export async function getUserById(userId: string): Promise<User | null> {
  * Get user by email
  */
 export async function getUserByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({
-        where: { email }
+    return await prisma.user.findFirst({
+        where: { email, isDeleted: false }
     });
 }
 
@@ -55,8 +55,8 @@ export async function registerWithEmailPassword(email: string, password: string,
  */
 export async function authenticateWithEmailPassword(email: string, password: string): Promise<User> {
     // Find user
-    const user = await prisma.user.findUnique({
-        where: { email }
+    const user = await prisma.user.findFirst({
+        where: { email, isDeleted: false }
     });
 
     if (!user || !user.password) {
@@ -78,7 +78,7 @@ export async function authenticateWithEmailPassword(email: string, password: str
  */
 export async function getUserIdentities(userId: string) {
     return await prisma.userIdentity.findMany({
-        where: { userId }
+        where: { userId, isDeleted: false }
     });
 }
 
@@ -89,7 +89,8 @@ export async function unlinkIdentity(userId: string, provider: string): Promise<
     await prisma.userIdentity.updateMany({
         where: {
             userId,
-            provider
+            provider,
+            isDeleted: false
         },
         data: {
             isDeleted: true
@@ -101,8 +102,8 @@ export async function unlinkIdentity(userId: string, provider: string): Promise<
  * findOrCreateUser - kept for compatibility with OAuth controllers if they still use it
  */
 export async function findOrCreateUser(profile: any, metadata?: any): Promise<User> {
-    const existingUser = await prisma.user.findUnique({
-        where: { email: profile.email }
+    const existingUser = await prisma.user.findFirst({
+        where: { email: profile.email, isDeleted: false }
     });
 
     if (existingUser) return existingUser;
@@ -122,8 +123,8 @@ export async function findOrCreateUser(profile: any, metadata?: any): Promise<Us
  */
 export async function findOrCreateUserByPhone(phone: string, name?: string): Promise<User> {
     const placeholderEmail = `${phone.replace(/[^0-9]/g, '')}@phone.local`;
-    const existingUser = await prisma.user.findUnique({
-        where: { email: placeholderEmail }
+    const existingUser = await prisma.user.findFirst({
+        where: { email: placeholderEmail, isDeleted: false }
     });
 
     if (existingUser) return existingUser;

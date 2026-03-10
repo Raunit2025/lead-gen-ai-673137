@@ -7,16 +7,16 @@ import bcrypt from 'bcrypt';
  * Find or create user - modified to support simpler schema
  */
 export async function getUserById(userId) {
-    return await prisma.user.findUnique({
-        where: { id: userId }
+    return await prisma.user.findFirst({
+        where: { id: userId, isDeleted: false }
     });
 }
 /**
  * Get user by email
  */
 export async function getUserByEmail(email) {
-    return await prisma.user.findUnique({
-        where: { email }
+    return await prisma.user.findFirst({
+        where: { email, isDeleted: false }
     });
 }
 /**
@@ -46,8 +46,8 @@ export async function registerWithEmailPassword(email, password, name) {
  */
 export async function authenticateWithEmailPassword(email, password) {
     // Find user
-    const user = await prisma.user.findUnique({
-        where: { email }
+    const user = await prisma.user.findFirst({
+        where: { email, isDeleted: false }
     });
     if (!user || !user.password) {
         throw new Error('Invalid email or password');
@@ -64,7 +64,7 @@ export async function authenticateWithEmailPassword(email, password) {
  */
 export async function getUserIdentities(userId) {
     return await prisma.userIdentity.findMany({
-        where: { userId }
+        where: { userId, isDeleted: false }
     });
 }
 /**
@@ -74,7 +74,8 @@ export async function unlinkIdentity(userId, provider) {
     await prisma.userIdentity.updateMany({
         where: {
             userId,
-            provider
+            provider,
+            isDeleted: false
         },
         data: {
             isDeleted: true
@@ -85,8 +86,8 @@ export async function unlinkIdentity(userId, provider) {
  * findOrCreateUser - kept for compatibility with OAuth controllers if they still use it
  */
 export async function findOrCreateUser(profile, metadata) {
-    const existingUser = await prisma.user.findUnique({
-        where: { email: profile.email }
+    const existingUser = await prisma.user.findFirst({
+        where: { email: profile.email, isDeleted: false }
     });
     if (existingUser)
         return existingUser;
@@ -104,8 +105,8 @@ export async function findOrCreateUser(profile, metadata) {
  */
 export async function findOrCreateUserByPhone(phone, name) {
     const placeholderEmail = `${phone.replace(/[^0-9]/g, '')}@phone.local`;
-    const existingUser = await prisma.user.findUnique({
-        where: { email: placeholderEmail }
+    const existingUser = await prisma.user.findFirst({
+        where: { email: placeholderEmail, isDeleted: false }
     });
     if (existingUser)
         return existingUser;

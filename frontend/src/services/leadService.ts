@@ -106,7 +106,8 @@ export const leadService = {
 
       return allLeads;
     } catch (e: any) {
-      console.error('Backend fetch error:', e.message || e);
+      console.error('Backend fetch failed:', e.response?.data?.message || e.message || e);
+      console.warn('Falling back to local leads only');
       return localLeads;
     }
   },
@@ -128,7 +129,7 @@ export const leadService = {
         generatedEmail: lead.generatedEmails?.[0]?.content || ''
       });
     } catch (e: any) {
-      console.error('Backend save error:', e.message || e);
+      console.error('Backend save failed:', e.response?.data?.message || e.message || e);
     }
   },
 
@@ -140,7 +141,7 @@ export const leadService = {
     try {
       await api.delete(`/leads/${leadId}`);
     } catch (e: any) {
-      console.error('Backend delete error:', e.message || e);
+      console.error('Backend delete failed:', e.response?.data?.message || e.message || e);
     }
   },
 
@@ -159,7 +160,7 @@ export const leadService = {
         generatedEmail: updatedLead.generatedEmails?.[0]?.content || ''
       });
     } catch (e: any) {
-      console.error('Backend update error:', e.message || e);
+      console.error('Backend update failed:', e.response?.data?.message || e.message || e);
     }
   },
 
