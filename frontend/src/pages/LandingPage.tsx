@@ -7,7 +7,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const handleScrollToHowItWorks = () => {
-    const section = document.getElementById('demo');
+    const section = document.getElementById('how-it-works');
     if (section) {
       section.scrollIntoView({ behavior: 'smooth' });
     }
@@ -119,7 +119,7 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works */}
-      <section id="demo" className="max-w-7xl mx-auto px-6 py-24 bg-muted/30 rounded-[3rem] mb-24 scroll-mt-24">
+      <section id="how-it-works" className="max-w-7xl mx-auto px-6 py-24 bg-muted/30 rounded-[3rem] mb-24 scroll-mt-24">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold tracking-tight mb-4">How LeadGen AI Works</h2>
           <p className="text-muted-foreground text-lg">Three simple steps to automate your sales prospecting</p>

@@ -8,7 +8,8 @@ import AuthPage from './pages/AuthPage';
 import { authService } from './services/authService';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  if (!authService.isAuthenticated()) {
+  const isAuth = authService.isAuthenticated();
+  if (!isAuth) {
     return <Navigate to="/" replace />;
   }
   return <>{children}</>;

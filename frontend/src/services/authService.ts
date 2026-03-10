@@ -50,10 +50,14 @@ export const authService = {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem('leadgen_ai_saved_leads');
+    // Clear any other possible session data
+    localStorage.clear(); 
   },
 
   isAuthenticated: () => {
-    return localStorage.getItem(AUTH_KEY) === 'true';
+    const isAuth = localStorage.getItem(AUTH_KEY) === 'true';
+    const hasToken = localStorage.getItem(ACCESS_TOKEN_KEY) !== null || import.meta.env.VITE_USE_MOCK_DATA === 'true';
+    return isAuth && hasToken;
   },
 
   getUser: (): User | null => {

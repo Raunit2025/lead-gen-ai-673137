@@ -1,71 +1,10 @@
 import prisma from "../client.js";
 import bcrypt from 'bcrypt';
 /**
- * User Service - Functional approach for user and identity management
+ * User Service - Simplified for LeadGen AI
  */
 /**
- * Find or create user based on auth provider profile
- * Handles multiple identity providers per user
- */
-export async function findOrCreateUser(profile, metadata) {
-    // Check if identity already exists
-    const existingIdentity = await prisma.userIdentity.findUnique({
-        where: {
-            provider_providerId: {
-                provider: profile.provider,
-                providerId: profile.providerId
-            }
-        },
-        include: {
-            user: true
-        }
-    });
-    if (existingIdentity) {
-        // User already logged in with this provider before
-        // Update metadata if provided (e.g., new profile picture, updated tokens)
-        if (metadata) {
-            await prisma.userIdentity.update({
-                where: { id: existingIdentity.id },
-                data: { metadata }
-            });
-        }
-        return existingIdentity.user;
-    }
-    // Check if user with this email already exists
-    const existingUser = await prisma.user.findUnique({
-        where: { email: profile.email }
-    });
-    if (existingUser) {
-        // User exists but logging in with a new provider
-        // Link this new identity to existing user
-        await prisma.userIdentity.create({
-            data: {
-                userId: existingUser.id,
-                provider: profile.provider,
-                providerId: profile.providerId,
-                metadata: metadata || profile.rawProfile
-            }
-        });
-        return existingUser;
-    }
-    // New user - create user and identity
-    const newUser = await prisma.user.create({
-        data: {
-            email: profile.email,
-            name: profile.name || null,
-            identities: {
-                create: {
-                    provider: profile.provider,
-                    providerId: profile.providerId,
-                    metadata: metadata || profile.rawProfile
-                }
-            }
-        }
-    });
-    return newUser;
-}
-/**
- * Get user by ID
+ * Find or create user - modified to support simpler schema
  */
 export async function getUserById(userId) {
     return await prisma.user.findUnique({
@@ -81,7 +20,47 @@ export async function getUserByEmail(email) {
     });
 }
 /**
- * Get all identities for a user
+ * Register user with email and password (simplified)
+ */
+export async function registerWithEmailPassword(email, password, name) {
+    // Check if user already exists
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) {
+        throw new Error('User with this email already exists');
+    }
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+    // Create user with email/password directly on model
+    const newUser = await prisma.user.create({
+        data: {
+            email,
+            name: name || null,
+            password: passwordHash,
+            isDeleted: false
+        }
+    });
+    return newUser;
+}
+/**
+ * Authenticate user with email and password (simplified)
+ */
+export async function authenticateWithEmailPassword(email, password) {
+    // Find user
+    const user = await prisma.user.findUnique({
+        where: { email }
+    });
+    if (!user || !user.password) {
+        throw new Error('Invalid email or password');
+    }
+    // Verify password
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+        throw new Error('Invalid email or password');
+    }
+    return user;
+}
+/**
+ * Get user identities - for backward compatibility if needed
  */
 export async function getUserIdentities(userId) {
     return await prisma.userIdentity.findMany({
@@ -89,14 +68,9 @@ export async function getUserIdentities(userId) {
     });
 }
 /**
- * Unlink an identity from a user
- * Only allowed if user has at least one other identity
+ * Unlink identity - for backward compatibility
  */
 export async function unlinkIdentity(userId, provider) {
-    const identities = await getUserIdentities(userId);
-    if (identities.length <= 1) {
-        throw new Error('Cannot unlink last identity. User must have at least one login method.');
-    }
     await prisma.userIdentity.updateMany({
         where: {
             userId,
@@ -108,120 +82,39 @@ export async function unlinkIdentity(userId, provider) {
     });
 }
 /**
- * Register user with email and password
+ * findOrCreateUser - kept for compatibility with OAuth controllers if they still use it
  */
-export async function registerWithEmailPassword(email, password, name) {
-    // Check if user already exists
-    const existingUser = await getUserByEmail(email);
-    if (existingUser) {
-        throw new Error('User with this email already exists');
-    }
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-    // Create user with email/password identity
-    const newUser = await prisma.user.create({
+export async function findOrCreateUser(profile, metadata) {
+    const existingUser = await prisma.user.findUnique({
+        where: { email: profile.email }
+    });
+    if (existingUser)
+        return existingUser;
+    return await prisma.user.create({
         data: {
-            email,
-            name: name || null,
-            identities: {
-                create: {
-                    provider: 'EmailPassword',
-                    providerId: email,
-                    metadata: {
-                        passwordHash,
-                        emailVerified: false,
-                        registeredAt: new Date().toISOString()
-                    }
-                }
-            }
+            email: profile.email,
+            name: profile.name || null,
+            password: '', // OAuth users have no password
+            isDeleted: false
         }
     });
-    return newUser;
 }
 /**
- * Authenticate user with email and password
- */
-export async function authenticateWithEmailPassword(email, password) {
-    // Find user identity
-    const identity = await prisma.userIdentity.findUnique({
-        where: {
-            provider_providerId: {
-                provider: 'EmailPassword',
-                providerId: email
-            }
-        },
-        include: {
-            user: true
-        }
-    });
-    if (!identity) {
-        throw new Error('Invalid email or password');
-    }
-    // Verify password
-    const metadata = identity.metadata;
-    const isValid = await bcrypt.compare(password, metadata.passwordHash);
-    if (!isValid) {
-        throw new Error('Invalid email or password');
-    }
-    // Update last login
-    await prisma.userIdentity.update({
-        where: { id: identity.id },
-        data: {
-            metadata: {
-                ...metadata,
-                lastLoginAt: new Date().toISOString()
-            }
-        }
-    });
-    return identity.user;
-}
-/**
- * Find or create user with phone number
+ * findOrCreateUserByPhone - for compatibility with phone OTP
  */
 export async function findOrCreateUserByPhone(phone, name) {
-    // Check if identity exists
-    const existingIdentity = await prisma.userIdentity.findUnique({
-        where: {
-            provider_providerId: {
-                provider: 'PhoneOTP',
-                providerId: phone
-            }
-        },
-        include: {
-            user: true
-        }
+    const placeholderEmail = `${phone.replace(/[^0-9]/g, '')}@phone.local`;
+    const existingUser = await prisma.user.findUnique({
+        where: { email: placeholderEmail }
     });
-    if (existingIdentity) {
-        // Update last login
-        await prisma.userIdentity.update({
-            where: { id: existingIdentity.id },
-            data: {
-                metadata: {
-                    ...existingIdentity.metadata,
-                    lastLoginAt: new Date().toISOString()
-                }
-            }
-        });
-        return existingIdentity.user;
-    }
-    // Create new user with phone identity
-    const newUser = await prisma.user.create({
+    if (existingUser)
+        return existingUser;
+    return await prisma.user.create({
         data: {
-            email: `${phone.replace(/[^0-9]/g, '')}@phone.local`, // Placeholder email
+            email: placeholderEmail,
             name: name || null,
-            identities: {
-                create: {
-                    provider: 'PhoneOTP',
-                    providerId: phone,
-                    metadata: {
-                        phone,
-                        phoneVerified: true,
-                        registeredAt: new Date().toISOString(),
-                        lastLoginAt: new Date().toISOString()
-                    }
-                }
-            }
+            password: '', // Phone users have no password
+            isDeleted: false
         }
     });
-    return newUser;
 }

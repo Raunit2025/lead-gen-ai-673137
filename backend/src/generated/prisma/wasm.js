@@ -97,6 +97,7 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   name: 'name',
+  password: 'password',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -111,6 +112,15 @@ exports.Prisma.UserIdentityScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
+};
+
+exports.Prisma.RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  userId: 'userId',
+  isDeleted: 'isDeleted',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.OtpScalarFieldEnum = {
@@ -157,6 +167,7 @@ exports.Prisma.JsonNullValueFilter = {
 exports.Prisma.ModelName = {
   User: 'User',
   UserIdentity: 'UserIdentity',
+  RefreshToken: 'RefreshToken',
   Otp: 'Otp'
 };
 /**
@@ -211,13 +222,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../generated/prisma\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// Auth models\nmodel User {\n  id         String         @id @default(uuid())\n  email      String         @unique\n  name       String?\n  createdAt  DateTime       @default(now())\n  updatedAt  DateTime?      @updatedAt\n  identities UserIdentity[]\n  isDeleted  Boolean?       @default(false)\n\n  @@index([email])\n}\n\nmodel UserIdentity {\n  id         String   @id @default(uuid())\n  userId     String\n  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  provider   String // 'Google', 'GitHub', 'EmailPassword', 'PhoneOTP', etc.\n  providerId String // Provider's unique user ID (or email for email/password)\n  metadata   Json? // Provider-specific data (passwordHash, tokens, profile data, etc.)\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n  isDeleted  Boolean? @default(false)\n\n  @@unique([provider, providerId])\n  @@index([userId])\n}\n\nmodel Otp {\n  id         String   @id @default(uuid())\n  identifier String // Phone number or email address\n  type       String // 'phone' or 'email'\n  otp        String // Hashed OTP\n  expiresAt  DateTime\n  attempts   Int      @default(0)\n  verified   Boolean  @default(false)\n  purpose    String? // 'login', 'registration', 'password_reset', '2fa', etc.\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n  isDeleted  Boolean? @default(false)\n\n  @@index([identifier, type])\n  @@index([expiresAt])\n  @@index([identifier, type, verified])\n}\n",
-  "inlineSchemaHash": "d2e70a5f97c2b8fe8b8e4580ec66574180ee2a30ee488558069f5ebf06d77f25",
+  "inlineSchema": "// This is your Prisma schema file,\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../generated/prisma\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// Auth models\nmodel User {\n  id         String         @id @default(uuid())\n  email      String         @unique\n  name       String?\n  password   String? // Added for simplified auth as requested\n  createdAt  DateTime       @default(now())\n  updatedAt  DateTime       @updatedAt\n  identities UserIdentity[]\n  isDeleted  Boolean        @default(false)\n\n  @@index([email])\n}\n\nmodel UserIdentity {\n  id         String   @id @default(uuid())\n  userId     String\n  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  provider   String // 'Google', 'GitHub', 'EmailPassword', 'PhoneOTP', etc.\n  providerId String // Provider's unique user ID (or email for email/password)\n  metadata   Json? // Provider-specific data (passwordHash, tokens, profile data, etc.)\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n  isDeleted  Boolean  @default(false)\n\n  @@unique([provider, providerId])\n  @@index([userId])\n}\n\nmodel RefreshToken {\n  id        String   @id @default(uuid())\n  token     String   @unique\n  userId    String\n  isDeleted Boolean  @default(false)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  @@index([userId])\n  @@index([token])\n}\n\nmodel Otp {\n  id         String   @id @default(uuid())\n  identifier String // Phone number or email address\n  type       String // 'phone' or 'email'\n  otp        String // Hashed OTP\n  expiresAt  DateTime\n  attempts   Int      @default(0)\n  verified   Boolean  @default(false)\n  purpose    String? // 'login', 'registration', 'password_reset', '2fa', etc.\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n  isDeleted  Boolean  @default(false)\n\n  @@index([identifier, type])\n  @@index([expiresAt])\n  @@index([identifier, type, verified])\n}\n",
+  "inlineSchemaHash": "546d15177938495277be3a8f430c05518aac2319a7c3c201b66ee161464f1d57",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"identities\",\"kind\":\"object\",\"type\":\"UserIdentity\",\"relationName\":\"UserToUserIdentity\"},{\"name\":\"isDeleted\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null},\"UserIdentity\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToUserIdentity\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"metadata\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isDeleted\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null},\"Otp\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"identifier\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"otp\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"attempts\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"verified\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"purpose\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isDeleted\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"identities\",\"kind\":\"object\",\"type\":\"UserIdentity\",\"relationName\":\"UserToUserIdentity\"},{\"name\":\"isDeleted\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null},\"UserIdentity\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToUserIdentity\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"metadata\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isDeleted\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null},\"RefreshToken\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isDeleted\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Otp\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"identifier\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"otp\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"attempts\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"verified\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"purpose\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isDeleted\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

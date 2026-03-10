@@ -15,10 +15,11 @@ model User {
   id         String         @id @default(uuid())
   email      String         @unique
   name       String?
+  password   String?        // Added for simplified auth as requested
   createdAt  DateTime       @default(now())
-  updatedAt  DateTime?      @updatedAt
+  updatedAt  DateTime       @updatedAt
   identities UserIdentity[]
-  isDeleted  Boolean?       @default(false)
+  isDeleted  Boolean        @default(false)
 
   @@index([email])
 }
@@ -32,12 +33,23 @@ model UserIdentity {
   metadata   Json? // Provider-specific data (passwordHash, tokens, profile data, etc.)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  isDeleted  Boolean? @default(false)
+  isDeleted  Boolean  @default(false)
 
   @@unique([provider, providerId])
   @@index([userId])
 }
 
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([token])
+}
 
 model Otp {
   id         String   @id @default(uuid())
@@ -50,7 +62,7 @@ model Otp {
   purpose    String?  // 'login', 'registration', 'password_reset', '2fa', etc.
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  isDeleted  Boolean? @default(false)
+  isDeleted  Boolean  @default(false)
 
   @@index([identifier, type])
   @@index([expiresAt])
