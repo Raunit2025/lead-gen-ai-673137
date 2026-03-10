@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import SearchPage from './pages/SearchPage';
@@ -8,9 +8,22 @@ import AuthPage from './pages/AuthPage';
 import { authService } from './services/authService';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuth = authService.isAuthenticated();
-  if (!isAuth) {
-    return <Navigate to="/" replace />;
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const auth = await authService.isAuthenticated();
+      setIsAuthenticated(auth);
+    };
+    checkAuth();
+  }, []);
+
+  if (isAuthenticated === null) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
   }
   return <>{children}</>;
 };

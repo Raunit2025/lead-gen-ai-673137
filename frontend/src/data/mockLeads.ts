@@ -2,7 +2,7 @@ import { Lead } from '../types';
 
 export const MOCK_LEADS: Lead[] = [
   {
-    id: '1',
+    id: 'd9b7a3e1-2c4f-4a0e-8d5c-7b6a1f2e3d4c',
     companyName: 'CloudScale AI',
     industry: 'SaaS',
     website: 'cloudscale.ai',
@@ -13,7 +13,7 @@ export const MOCK_LEADS: Lead[] = [
     linkedInUrl: 'linkedin.com/company/cloudscale-ai'
   },
   {
-    id: '2',
+    id: 'e8c8b4f2-3d5a-4b1f-9e6d-8c7b2f3e4d5a',
     companyName: 'HealthSync Solutions',
     industry: 'Healthcare',
     website: 'healthsync.io',
@@ -24,7 +24,7 @@ export const MOCK_LEADS: Lead[] = [
     linkedInUrl: 'linkedin.com/company/healthsync-solutions'
   },
   {
-    id: '3',
+    id: 'f9d9c5a3-4e6b-4c2a-0f7e-9d8c3f4e5d6b',
     companyName: 'FinFlow Systems',
     industry: 'Fintech',
     website: 'finflow.com',
@@ -35,7 +35,7 @@ export const MOCK_LEADS: Lead[] = [
     linkedInUrl: 'linkedin.com/company/finflow-systems'
   },
   {
-    id: '4',
+    id: 'a0e0d6b4-5f7c-4d3b-1a8f-0e9d4f5e6d7c',
     companyName: 'EcoStore Global',
     industry: 'E-commerce',
     website: 'ecostore.com',
@@ -46,7 +46,7 @@ export const MOCK_LEADS: Lead[] = [
     linkedInUrl: 'linkedin.com/company/ecostore-global'
   },
   {
-    id: '5',
+    id: 'b1f1e7c5-6a8d-4e4c-2b9a-1f0e5f6e7d8a',
     companyName: 'DataNexus Tech',
     industry: 'SaaS',
     website: 'datanexus.tech',

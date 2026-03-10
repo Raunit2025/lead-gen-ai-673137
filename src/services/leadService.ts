@@ -2,16 +2,52 @@ import { Lead, SearchFilters } from '../types';
 import { MOCK_LEADS } from '../data/mockLeads';
 import { supabase } from '../lib/supabaseClient';
 
+const LOCAL_STORAGE_KEY = 'leadgen_saved_leads';
+
+const getLocalStorageLeads = (): Lead[] => {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error('Failed to parse leads from local storage', e);
+    return [];
+  }
+};
+
+const saveToLocalStorage = (lead: Lead) => {
+  const leads = getLocalStorageLeads();
+  if (!leads.find(l => l.id === lead.id)) {
+    leads.push({ ...lead, isSaved: true });
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leads));
+  }
+};
+
+const removeFromLocalStorage = (leadId: string) => {
+  const leads = getLocalStorageLeads();
+  const filtered = leads.filter(l => l.id !== leadId);
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(filtered));
+};
+
+const updateInLocalStorage = (updatedLead: Lead) => {
+  const leads = getLocalStorageLeads();
+  const index = leads.findIndex(l => l.id === updatedLead.id);
+  if (index !== -1) {
+    leads[index] = { ...updatedLead, isSaved: true };
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leads));
+  }
+};
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true';
+
 export const leadService = {
   searchLeads: async (filters: SearchFilters): Promise<Lead[]> => {
     // Simulate AI powered search with the filters
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // In a real AI implementation, this would call an LLM to generate these leads
-    // For now, we filter and randomize our base mock data to simulate "finding" leads
-    const { data: { user } } = await supabase.auth.getUser();
-    const savedLeads = user ? await leadService.getSavedLeads() : [];
-    const savedIds = savedLeads.map(l => l.id);
+    // Get leads from both Supabase and LocalStorage to mark as saved
+    const savedLeads = await leadService.getSavedLeads();
+    const savedIds = new Set(savedLeads.map(l => l.id));
+    const savedCompanyNames = new Set(savedLeads.map(l => l.companyName));
 
     return MOCK_LEADS.filter(lead => {
       let matches = true;
@@ -22,89 +58,162 @@ export const leadService = {
         matches = matches && lead.companySize === filters.companySize;
       }
       return matches;
-    }).map(lead => ({
+    }).map((lead): Lead => ({
       ...lead,
-      id: crypto.randomUUID(), // Generate fresh IDs to simulate new discovery
-      isSaved: savedIds.includes(lead.id),
+      isSaved: savedIds.has(lead.id) || savedCompanyNames.has(lead.companyName),
     }));
   },
 
   getSavedLeads: async (): Promise<Lead[]> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const localLeads = getLocalStorageLeads();
+    
+    if (USE_MOCK) return localLeads;
 
-    const { data, error } = await supabase
-      .from('saved_leads')
-      .select('id, user_id, company_name, industry, website, email, linkedin, generated_email, created_at')
-      .eq('user_id', user.id);
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Supabase auth error:', authError.message);
+        return localLeads;
+      }
+      if (!user) {
+        console.log('No authenticated user found for Supabase fetch');
+        return localLeads;
+      }
 
-    if (error) {
-      console.error('Error fetching leads:', error);
-      return [];
+      const { data, error } = await supabase
+        .from('saved_leads')
+        .select('id, user_id, company_name, industry, website, email, linkedin, generated_email, created_at')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Supabase fetch failed:', error.message, error.details, error.hint);
+        if (error.code === 'PGRST116') {
+          console.warn('The table "saved_leads" might not exist in the public schema.');
+        }
+        console.warn('Falling back to local leads only');
+        return localLeads;
+      }
+
+      const supabaseLeads: Lead[] = (data || []).map((item: any) => ({
+        id: item.id,
+        companyName: item.company_name || '',
+        industry: item.industry || '',
+        website: item.website || '',
+        contactEmail: item.email || '',
+        linkedInUrl: item.linkedin || '',
+        role: 'Lead',
+        location: 'Global',
+        companySize: 'SMB' as const,
+        isSaved: true,
+        generatedEmails: item.generated_email ? [{
+          id: crypto.randomUUID(),
+          type: 'email',
+          content: item.generated_email,
+          createdAt: item.created_at
+        }] : [],
+        generatedLinkedIn: []
+      }));
+
+      // Merge avoiding duplicates by ID or company name
+      const allLeads: Lead[] = [...supabaseLeads];
+      const supabaseIds = new Set(supabaseLeads.map(l => l.id));
+      const supabaseCompanies = new Set(supabaseLeads.map(l => l.companyName));
+
+      localLeads.forEach(l => {
+        if (!supabaseIds.has(l.id) && !supabaseCompanies.has(l.companyName)) {
+          allLeads.push(l);
+        }
+      });
+
+      return allLeads;
+    } catch (e: any) {
+      console.error('Unexpected Supabase error:', e.message || e);
+      return localLeads;
     }
-
-    return (data || []).map((item: any) => ({
-      id: item.id,
-      companyName: item.company_name || '',
-      industry: item.industry || '',
-      website: item.website || '',
-      contactEmail: item.email || '',
-      linkedInUrl: item.linkedin || '',
-      role: 'Lead', // Default as it's not in the schema
-      location: 'Global', // Default as it's not in the schema
-      companySize: 'SMB', // Default as it's not in the schema
-      isSaved: true,
-      generatedEmails: item.generated_email ? [{
-        id: crypto.randomUUID(),
-        type: 'email',
-        content: item.generated_email,
-        createdAt: item.created_at
-      }] : [],
-      generatedLinkedIn: [] // Not in the schema
-    }));
   },
 
   saveLead: async (lead: Lead) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User must be logged in to save leads');
+    // Always save to local storage as fallback
+    saveToLocalStorage(lead);
 
-    const { error } = await supabase.from('saved_leads').upsert({
-      id: lead.id,
-      user_id: user.id,
-      company_name: lead.companyName,
-      industry: lead.industry,
-      website: lead.website,
-      email: lead.contactEmail,
-      linkedin: lead.linkedInUrl,
-      generated_email: lead.generatedEmails?.[0]?.content || ''
-    });
+    if (USE_MOCK) return;
 
-    if (error) throw error;
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Supabase auth error during save:', authError.message);
+        return;
+      }
+      if (!user) return;
+
+      const { error } = await supabase.from('saved_leads').upsert({
+        id: lead.id,
+        user_id: user.id,
+        company_name: lead.companyName,
+        industry: lead.industry,
+        website: lead.website,
+        email: lead.contactEmail,
+        linkedin: lead.linkedInUrl,
+        generated_email: lead.generatedEmails?.[0]?.content || ''
+      });
+
+      if (error) {
+        console.error('Supabase save failed:', error.message, error.details, error.hint);
+      }
+    } catch (e: any) {
+      console.error('Unexpected Supabase error during save:', e.message || e);
+    }
   },
 
   removeLead: async (leadId: string) => {
-    const { error } = await supabase
-      .from('saved_leads')
-      .delete()
-      .eq('id', leadId);
+    removeFromLocalStorage(leadId);
 
-    if (error) throw error;
+    if (USE_MOCK) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('saved_leads')
+        .delete()
+        .eq('id', leadId);
+
+      if (error) {
+        console.error('Supabase delete failed:', error.message);
+      }
+    } catch (e) {
+      console.error('Supabase error during delete:', e);
+    }
   },
 
   updateLead: async (updatedLead: Lead) => {
-    const { error } = await supabase
-      .from('saved_leads')
-      .update({
-        company_name: updatedLead.companyName,
-        industry: updatedLead.industry,
-        website: updatedLead.website,
-        email: updatedLead.contactEmail,
-        linkedin: updatedLead.linkedInUrl,
-        generated_email: updatedLead.generatedEmails?.[0]?.content || ''
-      })
-      .eq('id', updatedLead.id);
+    updateInLocalStorage(updatedLead);
 
-    if (error) throw error;
+    if (USE_MOCK) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('saved_leads')
+        .update({
+          company_name: updatedLead.companyName,
+          industry: updatedLead.industry,
+          website: updatedLead.website,
+          email: updatedLead.contactEmail,
+          linkedin: updatedLead.linkedInUrl,
+          generated_email: updatedLead.generatedEmails?.[0]?.content || ''
+        })
+        .eq('id', updatedLead.id);
+
+      if (error) {
+        console.error('Supabase update failed:', error.message);
+      }
+    } catch (e) {
+      console.error('Supabase error during update:', e);
+    }
   },
 
   exportToCSV: (leads: Lead[]) => {
