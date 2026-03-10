@@ -116,10 +116,10 @@ export const leadService = {
     // Always save to local storage as fallback
     saveToLocalStorage(lead);
 
-    if (USE_MOCK) return;
+    if (USE_MOCK) return lead;
 
     try {
-      await api.post('/leads', {
+      const response = await api.post('/leads', {
         id: lead.id,
         companyName: lead.companyName,
         industry: lead.industry,
@@ -128,8 +128,18 @@ export const leadService = {
         linkedin: lead.linkedInUrl,
         generatedEmail: lead.generatedEmails?.[0]?.content || ''
       });
+      
+      const savedLead = {
+        ...lead,
+        id: response.data.id || lead.id,
+        isSaved: true
+      };
+      
+      updateInLocalStorage(savedLead);
+      return savedLead;
     } catch (e: any) {
       console.error('Backend save failed:', e.response?.data?.message || e.message || e);
+      throw e;
     }
   },
 
@@ -142,16 +152,17 @@ export const leadService = {
       await api.delete(`/leads/${leadId}`);
     } catch (e: any) {
       console.error('Backend delete failed:', e.response?.data?.message || e.message || e);
+      throw e;
     }
   },
 
   updateLead: async (updatedLead: Lead) => {
     updateInLocalStorage(updatedLead);
 
-    if (USE_MOCK) return;
+    if (USE_MOCK) return updatedLead;
 
     try {
-      await api.patch(`/leads/${updatedLead.id}`, {
+      const response = await api.patch(`/leads/${updatedLead.id}`, {
         companyName: updatedLead.companyName,
         industry: updatedLead.industry,
         website: updatedLead.website,
@@ -159,8 +170,17 @@ export const leadService = {
         linkedin: updatedLead.linkedInUrl,
         generatedEmail: updatedLead.generatedEmails?.[0]?.content || ''
       });
+      
+      const lead = {
+        ...updatedLead,
+        id: response.data.id || updatedLead.id
+      };
+      
+      updateInLocalStorage(lead);
+      return lead;
     } catch (e: any) {
       console.error('Backend update failed:', e.response?.data?.message || e.message || e);
+      throw e;
     }
   },
 

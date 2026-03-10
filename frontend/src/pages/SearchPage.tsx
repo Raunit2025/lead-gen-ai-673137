@@ -56,12 +56,15 @@ const SearchPage = () => {
     setIsEnriching(true);
     try {
       const enrichment = await aiService.enrichLead(selectedLead);
-      const updatedLead = { ...selectedLead, enrichment };
-      setSelectedLead(updatedLead);
-      // If it's already saved, update it in local storage
+      let updatedLead: Lead = { ...selectedLead, enrichment };
+      
+      // If it's already saved, update it in backend
       if (updatedLead.isSaved) {
-        await leadService.updateLead(updatedLead);
+        updatedLead = await leadService.updateLead(updatedLead);
       }
+      
+      setSelectedLead(updatedLead);
+      setLeads(leads.map(l => l.id === selectedLead.id ? updatedLead : l));
     } catch (error) {
       console.error('Enrichment failed', error);
     } finally {
@@ -74,23 +77,28 @@ const SearchPage = () => {
     setIsGenerating(type);
     try {
       let message: OutreachMessage;
+      let updatedLead: Lead;
+
       if (type === 'email') {
         message = await aiService.generateEmail(selectedLead);
-        const updatedLead = { 
+        updatedLead = { 
           ...selectedLead, 
           generatedEmails: [...(selectedLead.generatedEmails || []), message] 
         };
-        setSelectedLead(updatedLead);
-        if (updatedLead.isSaved) await leadService.updateLead(updatedLead);
       } else {
         message = await aiService.generateLinkedInMessage(selectedLead);
-        const updatedLead = { 
+        updatedLead = { 
           ...selectedLead, 
           generatedLinkedIn: [...(selectedLead.generatedLinkedIn || []), message] 
         };
-        setSelectedLead(updatedLead);
-        if (updatedLead.isSaved) await leadService.updateLead(updatedLead);
       }
+
+      if (updatedLead.isSaved) {
+        updatedLead = await leadService.updateLead(updatedLead);
+      }
+      
+      setSelectedLead(updatedLead);
+      setLeads(leads.map(l => l.id === selectedLead.id ? updatedLead : l));
     } catch (error) {
       console.error('Generation failed', error);
     } finally {
@@ -100,10 +108,11 @@ const SearchPage = () => {
 
   const handleSaveLead = async (lead: Lead) => {
     try {
-      await leadService.saveLead(lead);
-      setLeads(leads.map(l => l.id === lead.id ? { ...l, isSaved: true } : l));
+      const savedLead = await leadService.saveLead(lead);
+      // Update leads list with the saved lead (it might have a new ID from backend)
+      setLeads(leads.map(l => l.id === lead.id ? savedLead : l));
       if (selectedLead?.id === lead.id) {
-        setSelectedLead({ ...selectedLead, isSaved: true });
+        setSelectedLead(savedLead);
       }
     } catch (error) {
       console.error('Save failed', error);

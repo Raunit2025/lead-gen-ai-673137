@@ -3,19 +3,23 @@
 ## Changes Made
 
 ### Backend
-- **Lead Controller**: 
-  - Updated `getSavedLeads`, `removeLead`, and `updateLead` to strictly filter by `isDeleted: false`.
-  - Improved `saveLead` logic to validate incoming IDs. If the ID is not a valid UUID, it now creates a new record instead of attempting an `upsert` with an invalid ID, which was the likely cause of the 400 error.
-- **User Service**:
-  - Added `isDeleted: false` filters to all user retrieval and authentication methods (`getUserById`, `getUserByEmail`, `authenticateWithEmailPassword`, etc.) to adhere to the soft delete policy.
-- **Prisma**: Generated updated Prisma client.
+- **Lead Controller Improvements**:
+    - Updated `saveLead` logic in `backend/src/controllers/leadController.ts` to handle ID collisions between users. 
+    - Instead of a blind upsert by ID, the backend now checks if a lead with the provided ID exists and if it belongs to the current user.
+    - If a collision with another user's lead is detected (common when using mock data with fixed UUIDs), a new lead record is created for the current user with a fresh ID.
+    - This prevents users from "stealing" leads from each other and ensures that subsequent updates (PATCH) correctly find the lead belonging to the user.
 
 ### Frontend
-- **Lead Service**:
-  - Enhanced error logging in `getSavedLeads`, `saveLead`, `removeLead`, and `updateLead` to capture and display detailed error messages from the backend response.
-  - Added warnings when falling back to local storage due to backend fetch failures.
+- **Lead Service Enhancements**:
+    - Updated `frontend/src/services/leadService.ts` to throw errors in `saveLead`, `updateLead`, and `removeLead` functions instead of just logging them. This allows components to respond appropriately to failures.
+    - Modified `saveLead` and `updateLead` to return the updated lead data from the backend, including the actual ID assigned by the database.
+- **Search Page Fixes**:
+    - Updated `frontend/src/pages/SearchPage.tsx` to correctly handle the lead data returned from service calls.
+    - The `leads` and `selectedLead` states are now updated with the backend's response, ensuring the frontend always uses the correct, database-persisted ID for subsequent actions like enrichment or outreach generation.
+    - Fixed TypeScript assignment errors by explicitly typing `updatedLead` as `Lead`.
 
-## Features Verified
-- **Lead Discovery**: Search results are correctly filtered and marked as saved/unsaved.
-- **Lead Management**: Saving, updating, and removing leads now correctly interacts with the backend with proper UUID validation and soft delete handling.
-- **Error Handling**: Detailed error messages are now visible in the console if a backend request fails, aiding in future diagnostics.
+## Verification Results
+- **Prisma Client Generation**: Successfully ran `pnpm dbGenerate`.
+- **Backend Build**: Successfully ran `pnpm build` in the `backend` directory.
+- **Frontend Build**: Successfully ran `pnpm build` in the `frontend` directory.
+- **Error Resolution**: The changes address the root cause of "Backend update failed: Lead not found" errors by ensuring correct ownership and ID synchronization between frontend and backend.

@@ -21,7 +21,7 @@ export const saveLead = catchAsync(async (c) => {
     if (!companyName) {
         throw new ApiError(400, 'Company name is required');
     }
-    // Use upsert if id is provided and looks like a UUID
+    // Use upsert-like logic but with ownership check
     const isValidId = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     const leadData = {
         userId,
@@ -36,13 +36,35 @@ export const saveLead = catchAsync(async (c) => {
     };
     let lead;
     if (isValidId) {
-        lead = await prisma.savedLead.upsert({
-            where: { id },
-            update: leadData,
-            create: { ...leadData, id }
+        // Check if lead exists and who it belongs to
+        const existingLead = await prisma.savedLead.findUnique({
+            where: { id }
         });
+        if (existingLead) {
+            if (existingLead.userId === userId) {
+                // It belongs to the current user, update it
+                lead = await prisma.savedLead.update({
+                    where: { id },
+                    data: { ...leadData, updatedAt: new Date() }
+                });
+            }
+            else {
+                // Collision: ID exists but belongs to someone else (likely mock data)
+                // Create a new record for this user with a fresh ID
+                lead = await prisma.savedLead.create({
+                    data: { ...leadData, id: undefined }
+                });
+            }
+        }
+        else {
+            // Doesn't exist, create with provided ID
+            lead = await prisma.savedLead.create({
+                data: { ...leadData, id }
+            });
+        }
     }
     else {
+        // No valid ID provided, create new
         lead = await prisma.savedLead.create({
             data: { ...leadData, id: undefined }
         });
