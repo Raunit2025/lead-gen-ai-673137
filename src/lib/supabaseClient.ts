@@ -1,29 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseUrl = "https://ktzykdkfwbyytumynapl.supabase.co"
+const supabaseAnonKey = "sb_publishable_6jWenHnxx4KOik3F6gFY_g_3M6NvDwh"
 
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-const isMockMode = import.meta.env.VITE_USE_MOCK_DATA === 'true';
-
-
-
-if (!isMockMode && (!supabaseUrl || !supabaseAnonKey)) {
-
-  console.warn(
-
-    'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables are not configured. ' +
-
-    'Application will crash if not in mock mode.'
-
-  );
-
-}
-
-
-
-export const supabase = (supabaseUrl && supabaseAnonKey) 
-
-  ? createClient(supabaseUrl, supabaseAnonKey) 
-
-  : (null as any);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
