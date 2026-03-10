@@ -1,27 +1,28 @@
-import { createClient } from "@supabase/supabase-js"
+/**
+ * SUPABASE CLIENT - DUMMY IMPLEMENTATION
+ * 
+ * Direct Supabase usage from frontend is discouraged. 
+ * This file exists to prevent build/runtime errors if any imports remain.
+ * All data operations should go through the backend service layer.
+ */
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+console.warn("Direct Supabase usage is deprecated. Please use the backend service layer instead.")
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase credentials are missing! Check your environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY). Falling back to local storage.")
-}
-
-export const supabase = (supabaseUrl && supabaseAnonKey)
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : new Proxy({} as any, {
-      get: (_, prop) => {
-        if (prop === 'auth') {
-           return new Proxy({}, {
-             get: (_, authProp) => {
-               return () => {
-                 throw new Error("Supabase client not initialized: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are missing.")
-               }
-             }
-           })
-        }
-        return () => {
-          throw new Error("Supabase client not initialized: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are missing.")
-        }
-      }
-    })
+export const supabase = new Proxy({} as any, {
+  get: (_, prop) => {
+    if (prop === 'auth') {
+      return {
+        getSession: async () => ({ data: { session: null }, error: null }),
+        getUser: async () => ({ data: { user: null }, error: null }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+        signInWithPassword: async () => ({ data: {}, error: new Error("Supabase is disabled on frontend") }),
+        signUp: async () => ({ data: {}, error: new Error("Supabase is disabled on frontend") }),
+        signOut: async () => ({ error: null }),
+      };
+    }
+    return () => {
+      console.error(`Supabase method "${String(prop)}" called, but Supabase is disabled on frontend.`);
+      return { data: null, error: new Error("Supabase is disabled on frontend") };
+    };
+  }
+});

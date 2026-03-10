@@ -58,7 +58,7 @@ const SearchPage = () => {
       const enrichment = await aiService.enrichLead(selectedLead);
       const updatedLead = { ...selectedLead, enrichment };
       setSelectedLead(updatedLead);
-      // If it's already saved, update it in local storage (now Supabase)
+      // If it's already saved, update it in the database
       if (updatedLead.isSaved) {
         await leadService.updateLead(updatedLead);
       }

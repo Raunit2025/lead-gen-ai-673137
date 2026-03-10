@@ -1,6 +1,6 @@
 import { Lead, SearchFilters } from '../types';
 import { MOCK_LEADS } from '../data/mockLeads';
-import { supabase } from '../lib/supabaseClient';
+import api from '../lib/api';
 
 const LOCAL_STORAGE_KEY = 'leadgen_saved_leads';
 
@@ -44,7 +44,7 @@ export const leadService = {
     // Simulate AI powered search with the filters
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Get leads from both Supabase and LocalStorage to mark as saved
+    // Get leads from both Backend and LocalStorage to mark as saved
     const savedLeads = await leadService.getSavedLeads();
     const savedIds = new Set(savedLeads.map(l => l.id));
     const savedCompanyNames = new Set(savedLeads.map(l => l.companyName));
@@ -70,38 +70,12 @@ export const leadService = {
     if (USE_MOCK) return localLeads;
 
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) {
-        console.error('Supabase auth error:', authError.message);
-        return localLeads;
-      }
-      if (!user) {
-        console.log('No authenticated user found for Supabase fetch');
-        return localLeads;
-      }
+      const response = await api.get('/leads');
+      const data = response.data;
 
-      const { data, error } = await supabase
-        .from('saved_leads')
-        .select('id, user_id, company_name, industry, website, email, linkedin, generated_email, created_at')
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Supabase fetch failed with error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-        if (error.code === 'PGRST116' || error.message.includes('not found')) {
-          console.warn('The table "saved_leads" might not exist in the public schema or is inaccessible.');
-        }
-        console.warn('Falling back to local leads only');
-        return localLeads;
-      }
-
-      const supabaseLeads: Lead[] = (data || []).map((item: any) => ({
+      const backendLeads: Lead[] = (data || []).map((item: any) => ({
         id: item.id,
-        companyName: item.company_name || '',
+        companyName: item.companyName || '',
         industry: item.industry || '',
         website: item.website || '',
         contactEmail: item.email || '',
@@ -110,29 +84,29 @@ export const leadService = {
         location: 'Global',
         companySize: 'SMB' as const,
         isSaved: true,
-        generatedEmails: item.generated_email ? [{
+        generatedEmails: item.generatedEmail ? [{
           id: crypto.randomUUID(),
           type: 'email',
-          content: item.generated_email,
-          createdAt: item.created_at
+          content: item.generatedEmail,
+          createdAt: item.createdAt
         }] : [],
         generatedLinkedIn: []
       }));
 
       // Merge avoiding duplicates by ID or company name
-      const allLeads: Lead[] = [...supabaseLeads];
-      const supabaseIds = new Set(supabaseLeads.map(l => l.id));
-      const supabaseCompanies = new Set(supabaseLeads.map(l => l.companyName));
+      const allLeads: Lead[] = [...backendLeads];
+      const backendIds = new Set(backendLeads.map(l => l.id));
+      const backendCompanies = new Set(backendLeads.map(l => l.companyName));
 
       localLeads.forEach(l => {
-        if (!supabaseIds.has(l.id) && !supabaseCompanies.has(l.companyName)) {
+        if (!backendIds.has(l.id) && !backendCompanies.has(l.companyName)) {
           allLeads.push(l);
         }
       });
 
       return allLeads;
     } catch (e: any) {
-      console.error('Unexpected Supabase error:', e.message || e);
+      console.error('Backend fetch error:', e.message || e);
       return localLeads;
     }
   },
@@ -144,34 +118,17 @@ export const leadService = {
     if (USE_MOCK) return;
 
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) {
-        console.error('Supabase auth error during save:', authError.message);
-        return;
-      }
-      if (!user) return;
-
-      const { error } = await supabase.from('saved_leads').upsert({
+      await api.post('/leads', {
         id: lead.id,
-        user_id: user.id,
-        company_name: lead.companyName,
+        companyName: lead.companyName,
         industry: lead.industry,
         website: lead.website,
         email: lead.contactEmail,
         linkedin: lead.linkedInUrl,
-        generated_email: lead.generatedEmails?.[0]?.content || ''
+        generatedEmail: lead.generatedEmails?.[0]?.content || ''
       });
-
-      if (error) {
-        console.error('Supabase save failed with error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-      }
     } catch (e: any) {
-      console.error('Unexpected Supabase error during save:', e.message || e);
+      console.error('Backend save error:', e.message || e);
     }
   },
 
@@ -181,28 +138,9 @@ export const leadService = {
     if (USE_MOCK) return;
 
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) {
-        console.error('Supabase auth error during delete:', authError.message);
-        return;
-      }
-      if (!user) return;
-
-      const { error } = await supabase
-        .from('saved_leads')
-        .delete()
-        .eq('id', leadId);
-
-      if (error) {
-        console.error('Supabase delete failed with error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-      }
+      await api.delete(`/leads/${leadId}`);
     } catch (e: any) {
-      console.error('Supabase error during delete:', e.message || e);
+      console.error('Backend delete error:', e.message || e);
     }
   },
 
@@ -212,35 +150,16 @@ export const leadService = {
     if (USE_MOCK) return;
 
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) {
-        console.error('Supabase auth error during update:', authError.message);
-        return;
-      }
-      if (!user) return;
-
-      const { error } = await supabase
-        .from('saved_leads')
-        .update({
-          company_name: updatedLead.companyName,
-          industry: updatedLead.industry,
-          website: updatedLead.website,
-          email: updatedLead.contactEmail,
-          linkedin: updatedLead.linkedInUrl,
-          generated_email: updatedLead.generatedEmails?.[0]?.content || ''
-        })
-        .eq('id', updatedLead.id);
-
-      if (error) {
-        console.error('Supabase update failed with error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-      }
+      await api.patch(`/leads/${updatedLead.id}`, {
+        companyName: updatedLead.companyName,
+        industry: updatedLead.industry,
+        website: updatedLead.website,
+        email: updatedLead.contactEmail,
+        linkedin: updatedLead.linkedInUrl,
+        generatedEmail: updatedLead.generatedEmails?.[0]?.content || ''
+      });
     } catch (e: any) {
-      console.error('Supabase error during update:', e.message || e);
+      console.error('Backend update error:', e.message || e);
     }
   },
 

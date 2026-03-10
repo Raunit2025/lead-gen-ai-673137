@@ -5,6 +5,7 @@ import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 
 import authRoutes from './routes/auth.routes.ts';
+import leadRoutes from './routes/lead.routes.ts';
 
 const app = new Hono();
 
@@ -33,6 +34,9 @@ app.get('/health', c => {
 
 // Mount auth routes
 app.route('/auth', authRoutes);
+
+// Mount lead routes
+app.route('/leads', leadRoutes);
 
 // send back a 404 error for any unknown api request
 app.notFound(() => {

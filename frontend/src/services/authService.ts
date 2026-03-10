@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient';
+import api from '../lib/api';
 
 export interface User {
   id: string;
@@ -6,50 +6,80 @@ export interface User {
   name?: string;
 }
 
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true';
+
+const mockUser: User = {
+  id: 'mock-user-id',
+  email: 'demo@example.com',
+  name: 'Demo User',
+};
+
 export const authService = {
   login: async (email: string, password: string): Promise<void> => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    if (USE_MOCK) {
+      localStorage.setItem('leadgen_accessToken', 'mock-access-token');
+      localStorage.setItem('leadgen_refreshToken', 'mock-refresh-token');
+      localStorage.setItem('leadgen_user', JSON.stringify(mockUser));
+      return;
+    }
+
+    const response = await api.post('/auth/login', { email, password });
+    const { accessToken, refreshToken, user } = response.data;
     
-    if (error) throw error;
+    localStorage.setItem('leadgen_accessToken', accessToken);
+    localStorage.setItem('leadgen_refreshToken', refreshToken);
+    localStorage.setItem('leadgen_user', JSON.stringify(user));
   },
 
   register: async (email: string, password: string, name: string): Promise<void> => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-        },
-      },
-    });
+    if (USE_MOCK) {
+      localStorage.setItem('leadgen_accessToken', 'mock-access-token');
+      localStorage.setItem('leadgen_refreshToken', 'mock-refresh-token');
+      localStorage.setItem('leadgen_user', JSON.stringify({ ...mockUser, name, email }));
+      return;
+    }
 
-    if (error) throw error;
+    const response = await api.post('/auth/register', { email, password, name });
+    const { accessToken, refreshToken, user } = response.data;
+
+    localStorage.setItem('leadgen_accessToken', accessToken);
+    localStorage.setItem('leadgen_refreshToken', refreshToken);
+    localStorage.setItem('leadgen_user', JSON.stringify(user));
   },
 
   logout: async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    // Clear any local storage that might be left
-    localStorage.clear(); 
+    // Clear local storage
+    localStorage.removeItem('leadgen_accessToken');
+    localStorage.removeItem('leadgen_refreshToken');
+    localStorage.removeItem('leadgen_user');
+    localStorage.removeItem('leadgen_auth');
   },
 
-  isAuthenticated: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    return !!session;
+  isAuthenticated: async (): Promise<boolean> => {
+    if (USE_MOCK) {
+      return !!localStorage.getItem('leadgen_accessToken');
+    }
+
+    const token = localStorage.getItem('leadgen_accessToken');
+    if (!token) return false;
+
+    try {
+      // We can call /auth/me to verify if the token is still valid
+      await api.get('/auth/me');
+      return true;
+    } catch (error) {
+      return false;
+    }
   },
 
   getUser: async (): Promise<User | null> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    const userJson = localStorage.getItem('leadgen_user');
+    if (!userJson) return null;
     
-    return {
-      id: user.id,
-      email: user.email || '',
-      name: user.user_metadata?.name || '',
-    };
+    try {
+      return JSON.parse(userJson);
+    } catch (e) {
+      return null;
+    }
   }
 };
