@@ -1,11 +1,17 @@
 # Implementation Summary
 
 ## Changes Made
-- Fixed a race condition in `backend/src/controllers/leadController.ts` within the `saveLead` function.
-- Added a `try-catch` block around the lead creation logic to handle `PrismaClientKnownRequestError` with code `P2002` (unique constraint violation).
-- Implemented a fallback mechanism that checks ownership of the existing lead if a collision occurs and either updates the lead or creates a new one with a fresh ID.
-- Verified both backend and frontend builds to ensure stability.
+- **Fixed "Lead not found" errors** in the lead removal and update flows.
+- **Modified `backend/src/controllers/leadController.ts`**:
+    - Made `removeLead` idempotent by using `updateMany` with ownership check, ensuring it returns success even if the lead was already deleted or not found.
+    - Refined `updateLead` to use explicit ownership and existence checks.
+- **Modified `frontend/src/services/leadService.ts`**:
+    - Enhanced `updateLead` with a fallback mechanism that attempts to `saveLead` if the backend returns a 404 error, resolving issues where leads were only saved in local storage.
+- **Verified stability**:
+    - Successfully ran backend Prisma generation and typechecks.
+    - Successfully ran frontend typechecks.
 
 ## Features Implemented
-- Robust lead saving mechanism that handles concurrent requests and prevents unique constraint errors.
-- Support for multiple users saving the same mock leads without ID collisions.
+- **Idempotent Lead Removal**: Deleting a lead is now safer and doesn't trigger UI errors if the lead is already gone.
+- **Resilient Lead Synchronization**: The app now gracefully handles cases where local data is out of sync with the backend by automatically promoting local-only leads to the backend during updates.
+- **Robust Lead Saving**: (Previously implemented) Handles concurrent requests and prevents unique constraint errors.

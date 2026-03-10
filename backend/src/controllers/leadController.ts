@@ -113,16 +113,9 @@ export const removeLead = catchAsync(async (c: Context) => {
     const userId = c.get('userId');
     const leadId = c.req.param('id');
     
-    const lead = await prisma.savedLead.findFirst({
-        where: { id: leadId, userId, isDeleted: false }
-    });
-    
-    if (!lead) {
-        throw new ApiError(404, 'Lead not found');
-    }
-    
-    await prisma.savedLead.update({
-        where: { id: leadId },
+    // Use updateMany for atomicity and implicit ownership check
+    await prisma.savedLead.updateMany({
+        where: { id: leadId, userId },
         data: { isDeleted: true }
     });
     
@@ -139,6 +132,7 @@ export const updateLead = catchAsync(async (c: Context) => {
     
     const { companyName, industry, website, email, linkedin, generatedEmail } = body;
     
+    // Check ownership and existence first
     const lead = await prisma.savedLead.findFirst({
         where: { id: leadId, userId, isDeleted: false }
     });

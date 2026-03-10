@@ -179,6 +179,10 @@ export const leadService = {
       updateInLocalStorage(lead);
       return lead;
     } catch (e: any) {
+      if (e.response?.status === 404) {
+        console.warn('Lead not found on backend during update, attempting to save as new...');
+        return leadService.saveLead(updatedLead);
+      }
       console.error('Backend update failed:', e.response?.data?.message || e.message || e);
       throw e;
     }
