@@ -8,7 +8,8 @@ import {
   Search,
   ChevronRight,
   Filter,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2
 } from 'lucide-react';
 import { leadService } from '../services/leadService';
 import { Lead } from '../types';
@@ -17,21 +18,33 @@ import { clsx } from 'clsx';
 const DashboardPage = () => {
   const [savedLeads, setSavedLeads] = useState<Lead[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadLeads();
   }, []);
 
-  const loadLeads = () => {
-    const leads = leadService.getSavedLeads();
-    setSavedLeads(leads);
+  const loadLeads = async () => {
+    setIsLoading(true);
+    try {
+      const leads = await leadService.getSavedLeads();
+      setSavedLeads(leads);
+    } catch (error) {
+      console.error('Failed to load leads:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Are you sure you want to remove this lead?')) {
-      leadService.removeLead(id);
-      loadLeads();
+      try {
+        await leadService.removeLead(id);
+        await loadLeads();
+      } catch (error) {
+        console.error('Failed to delete lead:', error);
+      }
     }
   };
 
@@ -112,7 +125,14 @@ const DashboardPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredLeads.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-20 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary mb-2" />
+                    <p className="text-muted-foreground">Loading leads...</p>
+                  </td>
+                </tr>
+              ) : filteredLeads.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-20 text-center text-muted-foreground">
                     No saved leads found.

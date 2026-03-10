@@ -58,9 +58,9 @@ const SearchPage = () => {
       const enrichment = await aiService.enrichLead(selectedLead);
       const updatedLead = { ...selectedLead, enrichment };
       setSelectedLead(updatedLead);
-      // If it's already saved, update it in local storage
+      // If it's already saved, update it in local storage (now Supabase)
       if (updatedLead.isSaved) {
-        leadService.updateLead(updatedLead);
+        await leadService.updateLead(updatedLead);
       }
     } catch (error) {
       console.error('Enrichment failed', error);
@@ -81,7 +81,7 @@ const SearchPage = () => {
           generatedEmails: [...(selectedLead.generatedEmails || []), message] 
         };
         setSelectedLead(updatedLead);
-        if (updatedLead.isSaved) leadService.updateLead(updatedLead);
+        if (updatedLead.isSaved) await leadService.updateLead(updatedLead);
       } else {
         message = await aiService.generateLinkedInMessage(selectedLead);
         const updatedLead = { 
@@ -89,7 +89,7 @@ const SearchPage = () => {
           generatedLinkedIn: [...(selectedLead.generatedLinkedIn || []), message] 
         };
         setSelectedLead(updatedLead);
-        if (updatedLead.isSaved) leadService.updateLead(updatedLead);
+        if (updatedLead.isSaved) await leadService.updateLead(updatedLead);
       }
     } catch (error) {
       console.error('Generation failed', error);
@@ -98,11 +98,16 @@ const SearchPage = () => {
     }
   };
 
-  const handleSaveLead = (lead: Lead) => {
-    leadService.saveLead(lead);
-    setLeads(leads.map(l => l.id === lead.id ? { ...l, isSaved: true } : l));
-    if (selectedLead?.id === lead.id) {
-      setSelectedLead({ ...selectedLead, isSaved: true });
+  const handleSaveLead = async (lead: Lead) => {
+    try {
+      await leadService.saveLead(lead);
+      setLeads(leads.map(l => l.id === lead.id ? { ...l, isSaved: true } : l));
+      if (selectedLead?.id === lead.id) {
+        setSelectedLead({ ...selectedLead, isSaved: true });
+      }
+    } catch (error) {
+      console.error('Failed to save lead:', error);
+      alert('Failed to save lead. Please try again.');
     }
   };
 

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 import { Zap, Mail, Lock, User, ArrowRight } from 'lucide-react';
 
 const AuthPage = () => {
@@ -11,12 +12,13 @@ const AuthPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
-  React.useEffect(() => {
-    if (authService.isAuthenticated()) {
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
       navigate('/search');
     }
-  }, [navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,11 +32,19 @@ const AuthPage = () => {
       }
       navigate('/search');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Authentication failed');
+      setError(err.message || 'Authentication failed');
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">

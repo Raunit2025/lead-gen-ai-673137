@@ -1,49 +1,108 @@
 import { Lead, SearchFilters } from '../types';
 import { MOCK_LEADS } from '../data/mockLeads';
-
-const SAVED_LEADS_KEY = 'leadgen_ai_saved_leads';
+import { supabase } from '../lib/supabaseClient';
 
 export const leadService = {
   searchLeads: async (filters: SearchFilters): Promise<Lead[]> => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // In a real app, this would be an AI-powered search or database query
-    // Here we filter MOCK_LEADS based on industry or just return them with some variations
     return MOCK_LEADS.filter(lead => {
       if (!filters.industry) return true;
       return lead.industry.toLowerCase().includes(filters.industry.toLowerCase());
     }).map(lead => ({
       ...lead,
-      // Randomize IDs if we want many results, but for now let's keep it simple
       id: `${lead.id}-${Math.random().toString(36).substr(2, 5)}`
     }));
   },
 
-  getSavedLeads: (): Lead[] => {
-    const saved = localStorage.getItem(SAVED_LEADS_KEY);
-    return saved ? JSON.parse(saved) : [];
-  },
+  getSavedLeads: async (): Promise<Lead[]> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
 
-  saveLead: (lead: Lead) => {
-    const saved = leadService.getSavedLeads();
-    if (!saved.find(l => l.id === lead.id)) {
-      localStorage.setItem(SAVED_LEADS_KEY, JSON.stringify([...saved, { ...lead, isSaved: true }]));
+    const { data, error } = await supabase
+      .from('saved_leads')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error fetching leads:', error);
+      return [];
     }
+
+    return (data || []).map(item => ({
+      id: item.id,
+      companyName: item.company_name,
+      industry: item.industry,
+      website: item.website,
+      contactEmail: item.email,
+      linkedInUrl: item.linkedin,
+      role: item.role,
+      location: item.location,
+      companySize: item.company_size,
+      isSaved: true,
+      enrichment: item.enrichment,
+      generatedEmails: item.generated_email ? [{
+        id: 'imported',
+        type: 'email',
+        content: item.generated_email,
+        createdAt: item.created_at
+      }] : [],
+      generatedLinkedIn: item.generated_linkedin || []
+    }));
   },
 
-  removeLead: (leadId: string) => {
-    const saved = leadService.getSavedLeads();
-    localStorage.setItem(SAVED_LEADS_KEY, JSON.stringify(saved.filter(l => l.id !== leadId)));
+  saveLead: async (lead: Lead) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase.from('saved_leads').upsert({
+      id: lead.id,
+      user_id: user.id,
+      company_name: lead.companyName,
+      industry: lead.industry,
+      website: lead.website,
+      email: lead.contactEmail,
+      linkedin: lead.linkedInUrl,
+      role: lead.role,
+      location: lead.location,
+      company_size: lead.companySize,
+      enrichment: lead.enrichment,
+      generated_email: lead.generatedEmails?.[0]?.content || '',
+      generated_linkedin: lead.generatedLinkedIn
+    });
+
+    if (error) throw error;
   },
 
-  updateLead: (updatedLead: Lead) => {
-    const saved = leadService.getSavedLeads();
-    const index = saved.findIndex(l => l.id === updatedLead.id);
-    if (index !== -1) {
-      saved[index] = updatedLead;
-      localStorage.setItem(SAVED_LEADS_KEY, JSON.stringify(saved));
-    }
+  removeLead: async (leadId: string) => {
+    const { error } = await supabase
+      .from('saved_leads')
+      .delete()
+      .eq('id', leadId);
+
+    if (error) throw error;
+  },
+
+  updateLead: async (updatedLead: Lead) => {
+    const { error } = await supabase
+      .from('saved_leads')
+      .update({
+        company_name: updatedLead.companyName,
+        industry: updatedLead.industry,
+        website: updatedLead.website,
+        email: updatedLead.contactEmail,
+        linkedin: updatedLead.linkedInUrl,
+        role: updatedLead.role,
+        location: updatedLead.location,
+        company_size: updatedLead.companySize,
+        enrichment: updatedLead.enrichment,
+        generated_email: updatedLead.generatedEmails?.[0]?.content || '',
+        generated_linkedin: updatedLead.generatedLinkedIn
+      })
+      .eq('id', updatedLead.id);
+
+    if (error) throw error;
   },
 
   exportToCSV: (leads: Lead[]) => {

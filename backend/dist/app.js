@@ -3,13 +3,10 @@ import ApiError from "./utils/ApiError.js";
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import authRoutes from "./routes/auth.routes.js";
 const app = new Hono();
 // set security HTTP headers only in production
 if (process.env.NODE_ENV === 'production')
     app.use(secureHeaders());
-// Note: compress() middleware is intentionally NOT used as it blocks streaming responses
-// If you need compression for non-streaming routes, apply it selectively per route
 // enable cors
 app.use(cors());
 // removing this route will result in error in server startup so its strictly prohibited to remove this route
@@ -23,8 +20,6 @@ app.get('/version.json', c => {
 app.get('/health', c => {
     return c.text('OK');
 });
-// Mount auth routes
-app.route('/auth', authRoutes);
 // send back a 404 error for any unknown api request
 app.notFound(() => {
     throw new ApiError(404, 'Not found');

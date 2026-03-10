@@ -1,43 +1,42 @@
 # API Specification
 
-## Auth
+## Backend (Hono)
 
-### Register
-- **URL**: `/auth/register`
-- **Method**: `POST`
-- **Auth Required**: No
-- **Request Body**:
-  ```json
-  {
-    "email": "string",
-    "password": "string",
-    "name": "string"
-  }
-  ```
-- **Response**: `{ accessToken, refreshToken, user }`
+Base URL: `import.meta.env.VITE_API_BASE_URL`
 
-### Login
-- **URL**: `/auth/login`
-- **Method**: `POST`
-- **Auth Required**: No
-- **Request Body**:
-  ```json
-  {
-    "email": "string",
-    "password": "string"
-  }
-  ```
-- **Response**: `{ accessToken, refreshToken, user }`
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/` | Health Check | No |
+| GET | `/version.json` | Version Info | No |
+| GET | `/health` | Health Check | No |
 
-### Refresh Token
-- **URL**: `/auth/refresh`
-- **Method**: `POST`
-- **Auth Required**: No
-- **Request Body**: `{ refreshToken: "string" }`
-- **Response**: `{ accessToken }`
+## Supabase (Direct Integration)
 
-### Get Current User
-- **URL**: `/auth/me`
-- **Method**: `GET`
-- **Auth Required**: Yes
-- **Response**: `{ user }`
+The application interacts directly with Supabase for Authentication and Data Storage.
+
+### Authentication (Supabase Auth)
+
+Using `@supabase/supabase-js`:
+- `supabase.auth.signInWithPassword`
+- `supabase.auth.signUp`
+- `supabase.auth.signOut`
+- `supabase.auth.onAuthStateChange`
+
+### Database (Supabase Table: `saved_leads`)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary Key |
+| user_id | uuid | Foreign Key to Auth User |
+| company_name | text | |
+| industry | text | |
+| website | text | |
+| email | text | |
+| linkedin | text | |
+| role | text | |
+| location | text | |
+| company_size | text | |
+| enrichment | jsonb | AI Enrichment Data |
+| generated_emails | jsonb | List of Outreach Emails |
+| generated_linkedin | jsonb | List of LinkedIn Messages |
+| created_at | timestamp | Default: now() |

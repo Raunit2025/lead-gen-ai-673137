@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Zap, Target, Mail, BarChart3, ArrowRight, Search, MessageSquare, ShieldCheck } from 'lucide-react';
-import { authService } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
 
   const handleScrollToHowItWorks = () => {
     const section = document.getElementById('how-it-works');
@@ -14,7 +15,7 @@ const LandingPage = () => {
   };
 
   const handleGetStarted = () => {
-    if (authService.isAuthenticated()) {
+    if (isAuthenticated) {
       navigate('/search');
     } else {
       navigate('/auth');
@@ -32,7 +33,9 @@ const LandingPage = () => {
           <span className="font-bold text-xl tracking-tight">LeadGen AI</span>
         </div>
         <div className="flex items-center gap-6">
-          {!authService.isAuthenticated() ? (
+          {loading ? (
+            <div className="w-20 h-8 bg-secondary animate-pulse rounded-lg"></div>
+          ) : !isAuthenticated ? (
             <>
               <Link to="/auth" className="font-medium text-muted-foreground hover:text-foreground">Log in</Link>
               <button 

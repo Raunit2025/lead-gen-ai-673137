@@ -19,9 +19,16 @@ const Sidebar = () => {
     { icon: Bookmark, label: 'Saved Leads', path: '/dashboard' },
   ];
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Fallback: clear and navigate anyway if it fails
+      localStorage.clear();
+      navigate('/');
+    }
   };
 
   return (

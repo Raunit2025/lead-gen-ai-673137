@@ -1,67 +1,55 @@
-import api from '../lib/api';
+import { supabase } from '../lib/supabaseClient';
 
 export interface User {
   id: string;
   email: string;
-  name: string;
+  name?: string;
 }
-
-const AUTH_KEY = 'leadgen_auth';
-const USER_KEY = 'leadgen_user';
-const ACCESS_TOKEN_KEY = 'leadgen_accessToken';
-const REFRESH_TOKEN_KEY = 'leadgen_refreshToken';
 
 export const authService = {
   login: async (email: string, password: string): Promise<void> => {
-    if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
-      localStorage.setItem(AUTH_KEY, 'true');
-      localStorage.setItem(USER_KEY, JSON.stringify({ id: crypto.randomUUID(), email, name: 'User' }));
-      return;
-    }
-
-    const response = await api.post('/auth/login', { email, password });
-    const { accessToken, refreshToken, user } = response.data;
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     
-    localStorage.setItem(AUTH_KEY, 'true');
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    if (error) throw error;
   },
 
   register: async (email: string, password: string, name: string): Promise<void> => {
-    if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
-      localStorage.setItem(AUTH_KEY, 'true');
-      localStorage.setItem(USER_KEY, JSON.stringify({ id: crypto.randomUUID(), email, name }));
-      return;
-    }
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+        },
+      },
+    });
 
-    const response = await api.post('/auth/register', { email, password, name });
-    const { accessToken, refreshToken, user } = response.data;
-
-    localStorage.setItem(AUTH_KEY, 'true');
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    if (error) throw error;
   },
 
-  logout: () => {
-    localStorage.removeItem(AUTH_KEY);
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    localStorage.removeItem('leadgen_ai_saved_leads');
-    // Clear any other possible session data
+  logout: async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    // Clear any local storage that might be left
     localStorage.clear(); 
   },
 
-  isAuthenticated: () => {
-    const isAuth = localStorage.getItem(AUTH_KEY) === 'true';
-    const hasToken = localStorage.getItem(ACCESS_TOKEN_KEY) !== null || import.meta.env.VITE_USE_MOCK_DATA === 'true';
-    return isAuth && hasToken;
+  isAuthenticated: async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return !!session;
   },
 
-  getUser: (): User | null => {
-    const user = localStorage.getItem(USER_KEY);
-    return user ? JSON.parse(user) : null;
+  getUser: async (): Promise<User | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    
+    return {
+      id: user.id,
+      email: user.email || '',
+      name: user.user_metadata?.name || '',
+    };
   }
 };
