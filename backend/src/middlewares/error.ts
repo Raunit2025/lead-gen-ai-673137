@@ -1,4 +1,3 @@
-import { Prisma } from '../generated/prisma/index.js';
 import ApiError from '../utils/ApiError.ts';
 import dotenv from 'dotenv';
 import { Context } from 'hono';
@@ -35,9 +34,6 @@ export const errorHandler = (err: Error | HTTPException | ApiError | ZodError, c
         message = err.message;
     } else if (err instanceof ApiError) {
         statusCode = err.statusCode;
-        message = err.message;
-    } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        statusCode = 400;
         message = err.message;
     } else if (err.message) {
         message = err.message;

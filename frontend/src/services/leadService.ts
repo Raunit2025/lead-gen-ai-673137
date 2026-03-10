@@ -4,15 +4,23 @@ import { supabase } from '../lib/supabaseClient';
 
 export const leadService = {
   searchLeads: async (filters: SearchFilters): Promise<Lead[]> => {
-    // Simulate API call
+    // Simulate AI powered search with the filters
     await new Promise(resolve => setTimeout(resolve, 1500));
     
+    // In a real AI implementation, this would call an LLM to generate these leads
+    // For now, we filter and randomize our base mock data to simulate "finding" leads
     return MOCK_LEADS.filter(lead => {
-      if (!filters.industry) return true;
-      return lead.industry.toLowerCase().includes(filters.industry.toLowerCase());
+      let matches = true;
+      if (filters.industry) {
+        matches = matches && lead.industry.toLowerCase().includes(filters.industry.toLowerCase());
+      }
+      if (filters.companySize) {
+        matches = matches && lead.companySize === filters.companySize;
+      }
+      return matches;
     }).map(lead => ({
       ...lead,
-      id: `${lead.id}-${Math.random().toString(36).substr(2, 5)}`
+      id: crypto.randomUUID(), // Generate fresh IDs to simulate new discovery
     }));
   },
 
@@ -54,7 +62,7 @@ export const leadService = {
 
   saveLead: async (lead: Lead) => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) throw new Error('User must be logged in to save leads');
 
     const { error } = await supabase.from('saved_leads').upsert({
       id: lead.id,
@@ -106,20 +114,23 @@ export const leadService = {
   },
 
   exportToCSV: (leads: Lead[]) => {
-    const headers = ['Company Name', 'Industry', 'Website', 'Email', 'LinkedIn', 'Role', 'Location'];
+    const headers = ['Company Name', 'Industry', 'Website', 'Email', 'LinkedIn', 'Generated Email'];
     const rows = leads.map(l => [
       l.companyName,
       l.industry,
       l.website,
       l.contactEmail,
       l.linkedInUrl,
-      l.role,
-      l.location
+      l.generatedEmails?.[0]?.content || ''
     ]);
 
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...rows.map(row => row.map(cell => {
+        const value = (cell || '').toString();
+        const escaped = value.split('"').join('""');
+        return `"${escaped}"`;
+      }).join(','))
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
