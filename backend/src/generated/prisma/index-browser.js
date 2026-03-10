@@ -165,6 +165,20 @@ exports.Prisma.OtpScalarFieldEnum = {
   isDeleted: 'isDeleted'
 };
 
+exports.Prisma.SavedLeadScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  companyName: 'companyName',
+  industry: 'industry',
+  website: 'website',
+  email: 'email',
+  linkedin: 'linkedin',
+  generatedEmail: 'generatedEmail',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -196,7 +210,8 @@ exports.Prisma.ModelName = {
   User: 'User',
   UserIdentity: 'UserIdentity',
   RefreshToken: 'RefreshToken',
-  Otp: 'Otp'
+  Otp: 'Otp',
+  SavedLead: 'SavedLead'
 };
 
 /**

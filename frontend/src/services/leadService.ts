@@ -86,9 +86,14 @@ export const leadService = {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Supabase fetch failed:', error.message, error.details, error.hint);
-        if (error.code === 'PGRST116') {
-          console.warn('The table "saved_leads" might not exist in the public schema.');
+        console.error('Supabase fetch failed with error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        if (error.code === 'PGRST116' || error.message.includes('not found')) {
+          console.warn('The table "saved_leads" might not exist in the public schema or is inaccessible.');
         }
         console.warn('Falling back to local leads only');
         return localLeads;
@@ -158,7 +163,12 @@ export const leadService = {
       });
 
       if (error) {
-        console.error('Supabase save failed:', error.message, error.details, error.hint);
+        console.error('Supabase save failed with error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
       }
     } catch (e: any) {
       console.error('Unexpected Supabase error during save:', e.message || e);
@@ -184,7 +194,12 @@ export const leadService = {
         .eq('id', leadId);
 
       if (error) {
-        console.error('Supabase delete failed:', error.message, error.details);
+        console.error('Supabase delete failed with error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
       }
     } catch (e: any) {
       console.error('Supabase error during delete:', e.message || e);
@@ -217,7 +232,12 @@ export const leadService = {
         .eq('id', updatedLead.id);
 
       if (error) {
-        console.error('Supabase update failed:', error.message, error.details);
+        console.error('Supabase update failed with error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
       }
     } catch (e: any) {
       console.error('Supabase error during update:', e.message || e);

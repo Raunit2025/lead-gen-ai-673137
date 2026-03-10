@@ -33,6 +33,11 @@ export type RefreshToken = $Result.DefaultSelection<Prisma.$RefreshTokenPayload>
  * 
  */
 export type Otp = $Result.DefaultSelection<Prisma.$OtpPayload>
+/**
+ * Model SavedLead
+ * 
+ */
+export type SavedLead = $Result.DefaultSelection<Prisma.$SavedLeadPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -191,6 +196,16 @@ export class PrismaClient<
     * ```
     */
   get otp(): Prisma.OtpDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.savedLead`: Exposes CRUD operations for the **SavedLead** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SavedLeads
+    * const savedLeads = await prisma.savedLead.findMany()
+    * ```
+    */
+  get savedLead(): Prisma.SavedLeadDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -635,7 +650,8 @@ export namespace Prisma {
     User: 'User',
     UserIdentity: 'UserIdentity',
     RefreshToken: 'RefreshToken',
-    Otp: 'Otp'
+    Otp: 'Otp',
+    SavedLead: 'SavedLead'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -654,7 +670,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "userIdentity" | "refreshToken" | "otp"
+      modelProps: "user" | "userIdentity" | "refreshToken" | "otp" | "savedLead"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -954,6 +970,80 @@ export namespace Prisma {
           }
         }
       }
+      SavedLead: {
+        payload: Prisma.$SavedLeadPayload<ExtArgs>
+        fields: Prisma.SavedLeadFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SavedLeadFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SavedLeadFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>
+          }
+          findFirst: {
+            args: Prisma.SavedLeadFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SavedLeadFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>
+          }
+          findMany: {
+            args: Prisma.SavedLeadFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>[]
+          }
+          create: {
+            args: Prisma.SavedLeadCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>
+          }
+          createMany: {
+            args: Prisma.SavedLeadCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SavedLeadCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>[]
+          }
+          delete: {
+            args: Prisma.SavedLeadDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>
+          }
+          update: {
+            args: Prisma.SavedLeadUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>
+          }
+          deleteMany: {
+            args: Prisma.SavedLeadDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SavedLeadUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SavedLeadUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>[]
+          }
+          upsert: {
+            args: Prisma.SavedLeadUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SavedLeadPayload>
+          }
+          aggregate: {
+            args: Prisma.SavedLeadAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSavedLead>
+          }
+          groupBy: {
+            args: Prisma.SavedLeadGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SavedLeadGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SavedLeadCountArgs<ExtArgs>
+            result: $Utils.Optional<SavedLeadCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1054,6 +1144,7 @@ export namespace Prisma {
     userIdentity?: UserIdentityOmit
     refreshToken?: RefreshTokenOmit
     otp?: OtpOmit
+    savedLead?: SavedLeadOmit
   }
 
   /* Types for Logging */
@@ -5469,6 +5560,1079 @@ export namespace Prisma {
 
 
   /**
+   * Model SavedLead
+   */
+
+  export type AggregateSavedLead = {
+    _count: SavedLeadCountAggregateOutputType | null
+    _min: SavedLeadMinAggregateOutputType | null
+    _max: SavedLeadMaxAggregateOutputType | null
+  }
+
+  export type SavedLeadMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    companyName: string | null
+    industry: string | null
+    website: string | null
+    email: string | null
+    linkedin: string | null
+    generatedEmail: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    isDeleted: boolean | null
+  }
+
+  export type SavedLeadMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    companyName: string | null
+    industry: string | null
+    website: string | null
+    email: string | null
+    linkedin: string | null
+    generatedEmail: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    isDeleted: boolean | null
+  }
+
+  export type SavedLeadCountAggregateOutputType = {
+    id: number
+    userId: number
+    companyName: number
+    industry: number
+    website: number
+    email: number
+    linkedin: number
+    generatedEmail: number
+    createdAt: number
+    updatedAt: number
+    isDeleted: number
+    _all: number
+  }
+
+
+  export type SavedLeadMinAggregateInputType = {
+    id?: true
+    userId?: true
+    companyName?: true
+    industry?: true
+    website?: true
+    email?: true
+    linkedin?: true
+    generatedEmail?: true
+    createdAt?: true
+    updatedAt?: true
+    isDeleted?: true
+  }
+
+  export type SavedLeadMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    companyName?: true
+    industry?: true
+    website?: true
+    email?: true
+    linkedin?: true
+    generatedEmail?: true
+    createdAt?: true
+    updatedAt?: true
+    isDeleted?: true
+  }
+
+  export type SavedLeadCountAggregateInputType = {
+    id?: true
+    userId?: true
+    companyName?: true
+    industry?: true
+    website?: true
+    email?: true
+    linkedin?: true
+    generatedEmail?: true
+    createdAt?: true
+    updatedAt?: true
+    isDeleted?: true
+    _all?: true
+  }
+
+  export type SavedLeadAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SavedLead to aggregate.
+     */
+    where?: SavedLeadWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SavedLeads to fetch.
+     */
+    orderBy?: SavedLeadOrderByWithRelationInput | SavedLeadOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SavedLeadWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SavedLeads from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SavedLeads.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SavedLeads
+    **/
+    _count?: true | SavedLeadCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SavedLeadMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SavedLeadMaxAggregateInputType
+  }
+
+  export type GetSavedLeadAggregateType<T extends SavedLeadAggregateArgs> = {
+        [P in keyof T & keyof AggregateSavedLead]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSavedLead[P]>
+      : GetScalarType<T[P], AggregateSavedLead[P]>
+  }
+
+
+
+
+  export type SavedLeadGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SavedLeadWhereInput
+    orderBy?: SavedLeadOrderByWithAggregationInput | SavedLeadOrderByWithAggregationInput[]
+    by: SavedLeadScalarFieldEnum[] | SavedLeadScalarFieldEnum
+    having?: SavedLeadScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SavedLeadCountAggregateInputType | true
+    _min?: SavedLeadMinAggregateInputType
+    _max?: SavedLeadMaxAggregateInputType
+  }
+
+  export type SavedLeadGroupByOutputType = {
+    id: string
+    userId: string
+    companyName: string
+    industry: string | null
+    website: string | null
+    email: string | null
+    linkedin: string | null
+    generatedEmail: string | null
+    createdAt: Date
+    updatedAt: Date
+    isDeleted: boolean
+    _count: SavedLeadCountAggregateOutputType | null
+    _min: SavedLeadMinAggregateOutputType | null
+    _max: SavedLeadMaxAggregateOutputType | null
+  }
+
+  type GetSavedLeadGroupByPayload<T extends SavedLeadGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SavedLeadGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SavedLeadGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SavedLeadGroupByOutputType[P]>
+            : GetScalarType<T[P], SavedLeadGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SavedLeadSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    companyName?: boolean
+    industry?: boolean
+    website?: boolean
+    email?: boolean
+    linkedin?: boolean
+    generatedEmail?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    isDeleted?: boolean
+  }, ExtArgs["result"]["savedLead"]>
+
+  export type SavedLeadSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    companyName?: boolean
+    industry?: boolean
+    website?: boolean
+    email?: boolean
+    linkedin?: boolean
+    generatedEmail?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    isDeleted?: boolean
+  }, ExtArgs["result"]["savedLead"]>
+
+  export type SavedLeadSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    companyName?: boolean
+    industry?: boolean
+    website?: boolean
+    email?: boolean
+    linkedin?: boolean
+    generatedEmail?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    isDeleted?: boolean
+  }, ExtArgs["result"]["savedLead"]>
+
+  export type SavedLeadSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    companyName?: boolean
+    industry?: boolean
+    website?: boolean
+    email?: boolean
+    linkedin?: boolean
+    generatedEmail?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    isDeleted?: boolean
+  }
+
+  export type SavedLeadOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "companyName" | "industry" | "website" | "email" | "linkedin" | "generatedEmail" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["savedLead"]>
+
+  export type $SavedLeadPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SavedLead"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      companyName: string
+      industry: string | null
+      website: string | null
+      email: string | null
+      linkedin: string | null
+      generatedEmail: string | null
+      createdAt: Date
+      updatedAt: Date
+      isDeleted: boolean
+    }, ExtArgs["result"]["savedLead"]>
+    composites: {}
+  }
+
+  type SavedLeadGetPayload<S extends boolean | null | undefined | SavedLeadDefaultArgs> = $Result.GetResult<Prisma.$SavedLeadPayload, S>
+
+  type SavedLeadCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SavedLeadFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SavedLeadCountAggregateInputType | true
+    }
+
+  export interface SavedLeadDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SavedLead'], meta: { name: 'SavedLead' } }
+    /**
+     * Find zero or one SavedLead that matches the filter.
+     * @param {SavedLeadFindUniqueArgs} args - Arguments to find a SavedLead
+     * @example
+     * // Get one SavedLead
+     * const savedLead = await prisma.savedLead.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SavedLeadFindUniqueArgs>(args: SelectSubset<T, SavedLeadFindUniqueArgs<ExtArgs>>): Prisma__SavedLeadClient<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SavedLead that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SavedLeadFindUniqueOrThrowArgs} args - Arguments to find a SavedLead
+     * @example
+     * // Get one SavedLead
+     * const savedLead = await prisma.savedLead.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SavedLeadFindUniqueOrThrowArgs>(args: SelectSubset<T, SavedLeadFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SavedLeadClient<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SavedLead that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedLeadFindFirstArgs} args - Arguments to find a SavedLead
+     * @example
+     * // Get one SavedLead
+     * const savedLead = await prisma.savedLead.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SavedLeadFindFirstArgs>(args?: SelectSubset<T, SavedLeadFindFirstArgs<ExtArgs>>): Prisma__SavedLeadClient<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SavedLead that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedLeadFindFirstOrThrowArgs} args - Arguments to find a SavedLead
+     * @example
+     * // Get one SavedLead
+     * const savedLead = await prisma.savedLead.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SavedLeadFindFirstOrThrowArgs>(args?: SelectSubset<T, SavedLeadFindFirstOrThrowArgs<ExtArgs>>): Prisma__SavedLeadClient<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SavedLeads that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedLeadFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SavedLeads
+     * const savedLeads = await prisma.savedLead.findMany()
+     * 
+     * // Get first 10 SavedLeads
+     * const savedLeads = await prisma.savedLead.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const savedLeadWithIdOnly = await prisma.savedLead.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SavedLeadFindManyArgs>(args?: SelectSubset<T, SavedLeadFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SavedLead.
+     * @param {SavedLeadCreateArgs} args - Arguments to create a SavedLead.
+     * @example
+     * // Create one SavedLead
+     * const SavedLead = await prisma.savedLead.create({
+     *   data: {
+     *     // ... data to create a SavedLead
+     *   }
+     * })
+     * 
+     */
+    create<T extends SavedLeadCreateArgs>(args: SelectSubset<T, SavedLeadCreateArgs<ExtArgs>>): Prisma__SavedLeadClient<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SavedLeads.
+     * @param {SavedLeadCreateManyArgs} args - Arguments to create many SavedLeads.
+     * @example
+     * // Create many SavedLeads
+     * const savedLead = await prisma.savedLead.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SavedLeadCreateManyArgs>(args?: SelectSubset<T, SavedLeadCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SavedLeads and returns the data saved in the database.
+     * @param {SavedLeadCreateManyAndReturnArgs} args - Arguments to create many SavedLeads.
+     * @example
+     * // Create many SavedLeads
+     * const savedLead = await prisma.savedLead.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SavedLeads and only return the `id`
+     * const savedLeadWithIdOnly = await prisma.savedLead.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SavedLeadCreateManyAndReturnArgs>(args?: SelectSubset<T, SavedLeadCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SavedLead.
+     * @param {SavedLeadDeleteArgs} args - Arguments to delete one SavedLead.
+     * @example
+     * // Delete one SavedLead
+     * const SavedLead = await prisma.savedLead.delete({
+     *   where: {
+     *     // ... filter to delete one SavedLead
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SavedLeadDeleteArgs>(args: SelectSubset<T, SavedLeadDeleteArgs<ExtArgs>>): Prisma__SavedLeadClient<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SavedLead.
+     * @param {SavedLeadUpdateArgs} args - Arguments to update one SavedLead.
+     * @example
+     * // Update one SavedLead
+     * const savedLead = await prisma.savedLead.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SavedLeadUpdateArgs>(args: SelectSubset<T, SavedLeadUpdateArgs<ExtArgs>>): Prisma__SavedLeadClient<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SavedLeads.
+     * @param {SavedLeadDeleteManyArgs} args - Arguments to filter SavedLeads to delete.
+     * @example
+     * // Delete a few SavedLeads
+     * const { count } = await prisma.savedLead.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SavedLeadDeleteManyArgs>(args?: SelectSubset<T, SavedLeadDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SavedLeads.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedLeadUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SavedLeads
+     * const savedLead = await prisma.savedLead.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SavedLeadUpdateManyArgs>(args: SelectSubset<T, SavedLeadUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SavedLeads and returns the data updated in the database.
+     * @param {SavedLeadUpdateManyAndReturnArgs} args - Arguments to update many SavedLeads.
+     * @example
+     * // Update many SavedLeads
+     * const savedLead = await prisma.savedLead.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SavedLeads and only return the `id`
+     * const savedLeadWithIdOnly = await prisma.savedLead.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SavedLeadUpdateManyAndReturnArgs>(args: SelectSubset<T, SavedLeadUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SavedLead.
+     * @param {SavedLeadUpsertArgs} args - Arguments to update or create a SavedLead.
+     * @example
+     * // Update or create a SavedLead
+     * const savedLead = await prisma.savedLead.upsert({
+     *   create: {
+     *     // ... data to create a SavedLead
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SavedLead we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SavedLeadUpsertArgs>(args: SelectSubset<T, SavedLeadUpsertArgs<ExtArgs>>): Prisma__SavedLeadClient<$Result.GetResult<Prisma.$SavedLeadPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SavedLeads.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedLeadCountArgs} args - Arguments to filter SavedLeads to count.
+     * @example
+     * // Count the number of SavedLeads
+     * const count = await prisma.savedLead.count({
+     *   where: {
+     *     // ... the filter for the SavedLeads we want to count
+     *   }
+     * })
+    **/
+    count<T extends SavedLeadCountArgs>(
+      args?: Subset<T, SavedLeadCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SavedLeadCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SavedLead.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedLeadAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SavedLeadAggregateArgs>(args: Subset<T, SavedLeadAggregateArgs>): Prisma.PrismaPromise<GetSavedLeadAggregateType<T>>
+
+    /**
+     * Group by SavedLead.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SavedLeadGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SavedLeadGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SavedLeadGroupByArgs['orderBy'] }
+        : { orderBy?: SavedLeadGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SavedLeadGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSavedLeadGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SavedLead model
+   */
+  readonly fields: SavedLeadFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SavedLead.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SavedLeadClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SavedLead model
+   */
+  interface SavedLeadFieldRefs {
+    readonly id: FieldRef<"SavedLead", 'String'>
+    readonly userId: FieldRef<"SavedLead", 'String'>
+    readonly companyName: FieldRef<"SavedLead", 'String'>
+    readonly industry: FieldRef<"SavedLead", 'String'>
+    readonly website: FieldRef<"SavedLead", 'String'>
+    readonly email: FieldRef<"SavedLead", 'String'>
+    readonly linkedin: FieldRef<"SavedLead", 'String'>
+    readonly generatedEmail: FieldRef<"SavedLead", 'String'>
+    readonly createdAt: FieldRef<"SavedLead", 'DateTime'>
+    readonly updatedAt: FieldRef<"SavedLead", 'DateTime'>
+    readonly isDeleted: FieldRef<"SavedLead", 'Boolean'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SavedLead findUnique
+   */
+  export type SavedLeadFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * Filter, which SavedLead to fetch.
+     */
+    where: SavedLeadWhereUniqueInput
+  }
+
+  /**
+   * SavedLead findUniqueOrThrow
+   */
+  export type SavedLeadFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * Filter, which SavedLead to fetch.
+     */
+    where: SavedLeadWhereUniqueInput
+  }
+
+  /**
+   * SavedLead findFirst
+   */
+  export type SavedLeadFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * Filter, which SavedLead to fetch.
+     */
+    where?: SavedLeadWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SavedLeads to fetch.
+     */
+    orderBy?: SavedLeadOrderByWithRelationInput | SavedLeadOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SavedLeads.
+     */
+    cursor?: SavedLeadWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SavedLeads from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SavedLeads.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SavedLeads.
+     */
+    distinct?: SavedLeadScalarFieldEnum | SavedLeadScalarFieldEnum[]
+  }
+
+  /**
+   * SavedLead findFirstOrThrow
+   */
+  export type SavedLeadFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * Filter, which SavedLead to fetch.
+     */
+    where?: SavedLeadWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SavedLeads to fetch.
+     */
+    orderBy?: SavedLeadOrderByWithRelationInput | SavedLeadOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SavedLeads.
+     */
+    cursor?: SavedLeadWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SavedLeads from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SavedLeads.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SavedLeads.
+     */
+    distinct?: SavedLeadScalarFieldEnum | SavedLeadScalarFieldEnum[]
+  }
+
+  /**
+   * SavedLead findMany
+   */
+  export type SavedLeadFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * Filter, which SavedLeads to fetch.
+     */
+    where?: SavedLeadWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SavedLeads to fetch.
+     */
+    orderBy?: SavedLeadOrderByWithRelationInput | SavedLeadOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SavedLeads.
+     */
+    cursor?: SavedLeadWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SavedLeads from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SavedLeads.
+     */
+    skip?: number
+    distinct?: SavedLeadScalarFieldEnum | SavedLeadScalarFieldEnum[]
+  }
+
+  /**
+   * SavedLead create
+   */
+  export type SavedLeadCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * The data needed to create a SavedLead.
+     */
+    data: XOR<SavedLeadCreateInput, SavedLeadUncheckedCreateInput>
+  }
+
+  /**
+   * SavedLead createMany
+   */
+  export type SavedLeadCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SavedLeads.
+     */
+    data: SavedLeadCreateManyInput | SavedLeadCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SavedLead createManyAndReturn
+   */
+  export type SavedLeadCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * The data used to create many SavedLeads.
+     */
+    data: SavedLeadCreateManyInput | SavedLeadCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SavedLead update
+   */
+  export type SavedLeadUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SavedLead.
+     */
+    data: XOR<SavedLeadUpdateInput, SavedLeadUncheckedUpdateInput>
+    /**
+     * Choose, which SavedLead to update.
+     */
+    where: SavedLeadWhereUniqueInput
+  }
+
+  /**
+   * SavedLead updateMany
+   */
+  export type SavedLeadUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SavedLeads.
+     */
+    data: XOR<SavedLeadUpdateManyMutationInput, SavedLeadUncheckedUpdateManyInput>
+    /**
+     * Filter which SavedLeads to update
+     */
+    where?: SavedLeadWhereInput
+    /**
+     * Limit how many SavedLeads to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SavedLead updateManyAndReturn
+   */
+  export type SavedLeadUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * The data used to update SavedLeads.
+     */
+    data: XOR<SavedLeadUpdateManyMutationInput, SavedLeadUncheckedUpdateManyInput>
+    /**
+     * Filter which SavedLeads to update
+     */
+    where?: SavedLeadWhereInput
+    /**
+     * Limit how many SavedLeads to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SavedLead upsert
+   */
+  export type SavedLeadUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * The filter to search for the SavedLead to update in case it exists.
+     */
+    where: SavedLeadWhereUniqueInput
+    /**
+     * In case the SavedLead found by the `where` argument doesn't exist, create a new SavedLead with this data.
+     */
+    create: XOR<SavedLeadCreateInput, SavedLeadUncheckedCreateInput>
+    /**
+     * In case the SavedLead was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SavedLeadUpdateInput, SavedLeadUncheckedUpdateInput>
+  }
+
+  /**
+   * SavedLead delete
+   */
+  export type SavedLeadDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+    /**
+     * Filter which SavedLead to delete.
+     */
+    where: SavedLeadWhereUniqueInput
+  }
+
+  /**
+   * SavedLead deleteMany
+   */
+  export type SavedLeadDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SavedLeads to delete
+     */
+    where?: SavedLeadWhereInput
+    /**
+     * Limit how many SavedLeads to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SavedLead without action
+   */
+  export type SavedLeadDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SavedLead
+     */
+    select?: SavedLeadSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SavedLead
+     */
+    omit?: SavedLeadOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5536,6 +6700,23 @@ export namespace Prisma {
   };
 
   export type OtpScalarFieldEnum = (typeof OtpScalarFieldEnum)[keyof typeof OtpScalarFieldEnum]
+
+
+  export const SavedLeadScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    companyName: 'companyName',
+    industry: 'industry',
+    website: 'website',
+    email: 'email',
+    linkedin: 'linkedin',
+    generatedEmail: 'generatedEmail',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    isDeleted: 'isDeleted'
+  };
+
+  export type SavedLeadScalarFieldEnum = (typeof SavedLeadScalarFieldEnum)[keyof typeof SavedLeadScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -5941,6 +7122,88 @@ export namespace Prisma {
     isDeleted?: BoolWithAggregatesFilter<"Otp"> | boolean
   }
 
+  export type SavedLeadWhereInput = {
+    AND?: SavedLeadWhereInput | SavedLeadWhereInput[]
+    OR?: SavedLeadWhereInput[]
+    NOT?: SavedLeadWhereInput | SavedLeadWhereInput[]
+    id?: StringFilter<"SavedLead"> | string
+    userId?: StringFilter<"SavedLead"> | string
+    companyName?: StringFilter<"SavedLead"> | string
+    industry?: StringNullableFilter<"SavedLead"> | string | null
+    website?: StringNullableFilter<"SavedLead"> | string | null
+    email?: StringNullableFilter<"SavedLead"> | string | null
+    linkedin?: StringNullableFilter<"SavedLead"> | string | null
+    generatedEmail?: StringNullableFilter<"SavedLead"> | string | null
+    createdAt?: DateTimeFilter<"SavedLead"> | Date | string
+    updatedAt?: DateTimeFilter<"SavedLead"> | Date | string
+    isDeleted?: BoolFilter<"SavedLead"> | boolean
+  }
+
+  export type SavedLeadOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    companyName?: SortOrder
+    industry?: SortOrderInput | SortOrder
+    website?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    linkedin?: SortOrderInput | SortOrder
+    generatedEmail?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    isDeleted?: SortOrder
+  }
+
+  export type SavedLeadWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SavedLeadWhereInput | SavedLeadWhereInput[]
+    OR?: SavedLeadWhereInput[]
+    NOT?: SavedLeadWhereInput | SavedLeadWhereInput[]
+    userId?: StringFilter<"SavedLead"> | string
+    companyName?: StringFilter<"SavedLead"> | string
+    industry?: StringNullableFilter<"SavedLead"> | string | null
+    website?: StringNullableFilter<"SavedLead"> | string | null
+    email?: StringNullableFilter<"SavedLead"> | string | null
+    linkedin?: StringNullableFilter<"SavedLead"> | string | null
+    generatedEmail?: StringNullableFilter<"SavedLead"> | string | null
+    createdAt?: DateTimeFilter<"SavedLead"> | Date | string
+    updatedAt?: DateTimeFilter<"SavedLead"> | Date | string
+    isDeleted?: BoolFilter<"SavedLead"> | boolean
+  }, "id">
+
+  export type SavedLeadOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    companyName?: SortOrder
+    industry?: SortOrderInput | SortOrder
+    website?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    linkedin?: SortOrderInput | SortOrder
+    generatedEmail?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    isDeleted?: SortOrder
+    _count?: SavedLeadCountOrderByAggregateInput
+    _max?: SavedLeadMaxOrderByAggregateInput
+    _min?: SavedLeadMinOrderByAggregateInput
+  }
+
+  export type SavedLeadScalarWhereWithAggregatesInput = {
+    AND?: SavedLeadScalarWhereWithAggregatesInput | SavedLeadScalarWhereWithAggregatesInput[]
+    OR?: SavedLeadScalarWhereWithAggregatesInput[]
+    NOT?: SavedLeadScalarWhereWithAggregatesInput | SavedLeadScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SavedLead"> | string
+    userId?: StringWithAggregatesFilter<"SavedLead"> | string
+    companyName?: StringWithAggregatesFilter<"SavedLead"> | string
+    industry?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
+    website?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
+    email?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
+    linkedin?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
+    generatedEmail?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"SavedLead"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SavedLead"> | Date | string
+    isDeleted?: BoolWithAggregatesFilter<"SavedLead"> | boolean
+  }
+
   export type UserCreateInput = {
     id?: string
     email: string
@@ -6247,6 +7510,104 @@ export namespace Prisma {
     attempts?: IntFieldUpdateOperationsInput | number
     verified?: BoolFieldUpdateOperationsInput | boolean
     purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type SavedLeadCreateInput = {
+    id?: string
+    userId: string
+    companyName: string
+    industry?: string | null
+    website?: string | null
+    email?: string | null
+    linkedin?: string | null
+    generatedEmail?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isDeleted?: boolean
+  }
+
+  export type SavedLeadUncheckedCreateInput = {
+    id?: string
+    userId: string
+    companyName: string
+    industry?: string | null
+    website?: string | null
+    email?: string | null
+    linkedin?: string | null
+    generatedEmail?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isDeleted?: boolean
+  }
+
+  export type SavedLeadUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    industry?: NullableStringFieldUpdateOperationsInput | string | null
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedin?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type SavedLeadUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    industry?: NullableStringFieldUpdateOperationsInput | string | null
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedin?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type SavedLeadCreateManyInput = {
+    id?: string
+    userId: string
+    companyName: string
+    industry?: string | null
+    website?: string | null
+    email?: string | null
+    linkedin?: string | null
+    generatedEmail?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isDeleted?: boolean
+  }
+
+  export type SavedLeadUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    industry?: NullableStringFieldUpdateOperationsInput | string | null
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedin?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type SavedLeadUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    industry?: NullableStringFieldUpdateOperationsInput | string | null
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedin?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
@@ -6593,6 +7954,48 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type SavedLeadCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    companyName?: SortOrder
+    industry?: SortOrder
+    website?: SortOrder
+    email?: SortOrder
+    linkedin?: SortOrder
+    generatedEmail?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    isDeleted?: SortOrder
+  }
+
+  export type SavedLeadMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    companyName?: SortOrder
+    industry?: SortOrder
+    website?: SortOrder
+    email?: SortOrder
+    linkedin?: SortOrder
+    generatedEmail?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    isDeleted?: SortOrder
+  }
+
+  export type SavedLeadMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    companyName?: SortOrder
+    industry?: SortOrder
+    website?: SortOrder
+    email?: SortOrder
+    linkedin?: SortOrder
+    generatedEmail?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    isDeleted?: SortOrder
   }
 
   export type UserIdentityCreateNestedManyWithoutUserInput = {

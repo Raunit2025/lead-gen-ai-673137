@@ -2,20 +2,22 @@
 
 ## Changes Made
 
-### Frontend
-- **Supabase Integration Fixes**:
-    - Updated `MOCK_LEADS` in `src/data/mockLeads.ts` and `frontend/src/data/mockLeads.ts` to use valid UUID strings instead of numeric IDs. This ensures compatibility with the `saved_leads` table schema which expects UUID primary keys.
-    - Improved error logging in `leadService.ts` (both root and frontend) to provide detailed error messages (message, details, hint) for all Supabase operations (fetch, save, update, delete).
-    - Added explicit warnings for common Supabase errors, such as when the `saved_leads` table might be missing from the public schema (PGRST116).
-    - Fixed a bug in `frontend/src/App.tsx` where the `ProtectedRoute` was using an asynchronous authentication check synchronously.
-    - Ensured robust authentication checks before performing any Supabase database operations to avoid silent failures or incorrect redirections.
-    - Maintained and reinforced the `localStorage` fallback mechanism so the app remains functional even if Supabase is unavailable.
+### Supabase Integration
+- Updated `src/lib/supabaseClient.ts` and `frontend/src/lib/supabaseClient.ts` to use environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) instead of hardcoded credentials.
+- Added validation checks for Supabase credentials to provide clear error messages in the console if they are missing.
 
-## Features Implemented
-- Improved Supabase error diagnostics.
-- UUID-compliant mock data.
-- Correct asynchronous authentication handling in protected routes.
-- Dual-storage synchronization (Supabase + LocalStorage).
+### Database Schema (Prisma)
+- Added `SavedLead` model to `backend/src/prisma/schema.prisma` to ensure the `saved_leads` table exists in the database with the correct schema.
+- Configured the model with snake_case column names (`user_id`, `company_name`, etc.) using `@map` to match the frontend queries.
+- Ensured compliance with backward compatibility and soft delete rules (added `isDeleted` field).
+- Successfully ran `pnpm dbGenerate` to update the Prisma client.
 
-## Pending Features
-- None from the current request.
+### Lead Service Improvements
+- Enhanced error logging in `src/services/leadService.ts` and `frontend/src/services/leadService.ts` to provide detailed information (message, details, hint, code) for all Supabase operations.
+- Confirmed that all queries target the `saved_leads` table.
+- Verified that column names in queries match the new database schema.
+- Maintained LocalStorage as a fallback mechanism for when Supabase is unavailable.
+
+### Verification
+- Ran `pnpm build` in both backend and root directories to ensure no type errors or build issues.
+- Confirmed that `mockLeads.ts` uses valid UUIDs for compatibility with the database schema.

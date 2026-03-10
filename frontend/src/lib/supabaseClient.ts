@@ -1,6 +1,10 @@
 import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = "https://ktzykdkfwbyytumynapl.supabase.co"
-const supabaseAnonKey = "sb_publishable_6jWenHnxx4KOik3F6gFY_g_3M6NvDwh"
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error("Supabase credentials are missing! Check your environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY).")
+}
+
+export const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "")
