@@ -49,6 +49,7 @@ export const authService = {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem('leadgen_ai_saved_leads');
   },
 
   isAuthenticated: () => {
