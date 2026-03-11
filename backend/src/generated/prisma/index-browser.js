@@ -174,6 +174,7 @@ exports.Prisma.SavedLeadScalarFieldEnum = {
   email: 'email',
   linkedin: 'linkedin',
   generatedEmail: 'generatedEmail',
+  generatedLinkedin: 'generatedLinkedin',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'

@@ -103,9 +103,11 @@ model SavedLead {
 
   linkedin        String?
 
-  generatedEmail  String?  @map("generated_email")
+    generatedEmail  String?  @map("generated_email")
 
-  createdAt       DateTime @default(now()) @map("created_at")
+    generatedLinkedin String? @map("generated_linkedin")
+
+    createdAt       DateTime @default(now()) @map("created_at")
 
   updatedAt       DateTime @updatedAt @map("updated_at")
 

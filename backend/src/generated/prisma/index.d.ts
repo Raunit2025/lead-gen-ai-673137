@@ -5578,6 +5578,7 @@ export namespace Prisma {
     email: string | null
     linkedin: string | null
     generatedEmail: string | null
+    generatedLinkedin: string | null
     createdAt: Date | null
     updatedAt: Date | null
     isDeleted: boolean | null
@@ -5592,6 +5593,7 @@ export namespace Prisma {
     email: string | null
     linkedin: string | null
     generatedEmail: string | null
+    generatedLinkedin: string | null
     createdAt: Date | null
     updatedAt: Date | null
     isDeleted: boolean | null
@@ -5606,6 +5608,7 @@ export namespace Prisma {
     email: number
     linkedin: number
     generatedEmail: number
+    generatedLinkedin: number
     createdAt: number
     updatedAt: number
     isDeleted: number
@@ -5622,6 +5625,7 @@ export namespace Prisma {
     email?: true
     linkedin?: true
     generatedEmail?: true
+    generatedLinkedin?: true
     createdAt?: true
     updatedAt?: true
     isDeleted?: true
@@ -5636,6 +5640,7 @@ export namespace Prisma {
     email?: true
     linkedin?: true
     generatedEmail?: true
+    generatedLinkedin?: true
     createdAt?: true
     updatedAt?: true
     isDeleted?: true
@@ -5650,6 +5655,7 @@ export namespace Prisma {
     email?: true
     linkedin?: true
     generatedEmail?: true
+    generatedLinkedin?: true
     createdAt?: true
     updatedAt?: true
     isDeleted?: true
@@ -5737,6 +5743,7 @@ export namespace Prisma {
     email: string | null
     linkedin: string | null
     generatedEmail: string | null
+    generatedLinkedin: string | null
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -5768,6 +5775,7 @@ export namespace Prisma {
     email?: boolean
     linkedin?: boolean
     generatedEmail?: boolean
+    generatedLinkedin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isDeleted?: boolean
@@ -5782,6 +5790,7 @@ export namespace Prisma {
     email?: boolean
     linkedin?: boolean
     generatedEmail?: boolean
+    generatedLinkedin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isDeleted?: boolean
@@ -5796,6 +5805,7 @@ export namespace Prisma {
     email?: boolean
     linkedin?: boolean
     generatedEmail?: boolean
+    generatedLinkedin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isDeleted?: boolean
@@ -5810,12 +5820,13 @@ export namespace Prisma {
     email?: boolean
     linkedin?: boolean
     generatedEmail?: boolean
+    generatedLinkedin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     isDeleted?: boolean
   }
 
-  export type SavedLeadOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "companyName" | "industry" | "website" | "email" | "linkedin" | "generatedEmail" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["savedLead"]>
+  export type SavedLeadOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "companyName" | "industry" | "website" | "email" | "linkedin" | "generatedEmail" | "generatedLinkedin" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["savedLead"]>
 
   export type $SavedLeadPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "SavedLead"
@@ -5829,6 +5840,7 @@ export namespace Prisma {
       email: string | null
       linkedin: string | null
       generatedEmail: string | null
+      generatedLinkedin: string | null
       createdAt: Date
       updatedAt: Date
       isDeleted: boolean
@@ -6263,6 +6275,7 @@ export namespace Prisma {
     readonly email: FieldRef<"SavedLead", 'String'>
     readonly linkedin: FieldRef<"SavedLead", 'String'>
     readonly generatedEmail: FieldRef<"SavedLead", 'String'>
+    readonly generatedLinkedin: FieldRef<"SavedLead", 'String'>
     readonly createdAt: FieldRef<"SavedLead", 'DateTime'>
     readonly updatedAt: FieldRef<"SavedLead", 'DateTime'>
     readonly isDeleted: FieldRef<"SavedLead", 'Boolean'>
@@ -6711,6 +6724,7 @@ export namespace Prisma {
     email: 'email',
     linkedin: 'linkedin',
     generatedEmail: 'generatedEmail',
+    generatedLinkedin: 'generatedLinkedin',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     isDeleted: 'isDeleted'
@@ -7134,6 +7148,7 @@ export namespace Prisma {
     email?: StringNullableFilter<"SavedLead"> | string | null
     linkedin?: StringNullableFilter<"SavedLead"> | string | null
     generatedEmail?: StringNullableFilter<"SavedLead"> | string | null
+    generatedLinkedin?: StringNullableFilter<"SavedLead"> | string | null
     createdAt?: DateTimeFilter<"SavedLead"> | Date | string
     updatedAt?: DateTimeFilter<"SavedLead"> | Date | string
     isDeleted?: BoolFilter<"SavedLead"> | boolean
@@ -7148,6 +7163,7 @@ export namespace Prisma {
     email?: SortOrderInput | SortOrder
     linkedin?: SortOrderInput | SortOrder
     generatedEmail?: SortOrderInput | SortOrder
+    generatedLinkedin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isDeleted?: SortOrder
@@ -7165,6 +7181,7 @@ export namespace Prisma {
     email?: StringNullableFilter<"SavedLead"> | string | null
     linkedin?: StringNullableFilter<"SavedLead"> | string | null
     generatedEmail?: StringNullableFilter<"SavedLead"> | string | null
+    generatedLinkedin?: StringNullableFilter<"SavedLead"> | string | null
     createdAt?: DateTimeFilter<"SavedLead"> | Date | string
     updatedAt?: DateTimeFilter<"SavedLead"> | Date | string
     isDeleted?: BoolFilter<"SavedLead"> | boolean
@@ -7179,6 +7196,7 @@ export namespace Prisma {
     email?: SortOrderInput | SortOrder
     linkedin?: SortOrderInput | SortOrder
     generatedEmail?: SortOrderInput | SortOrder
+    generatedLinkedin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isDeleted?: SortOrder
@@ -7199,6 +7217,7 @@ export namespace Prisma {
     email?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
     linkedin?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
     generatedEmail?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
+    generatedLinkedin?: StringNullableWithAggregatesFilter<"SavedLead"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"SavedLead"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"SavedLead"> | Date | string
     isDeleted?: BoolWithAggregatesFilter<"SavedLead"> | boolean
@@ -7524,6 +7543,7 @@ export namespace Prisma {
     email?: string | null
     linkedin?: string | null
     generatedEmail?: string | null
+    generatedLinkedin?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
@@ -7538,6 +7558,7 @@ export namespace Prisma {
     email?: string | null
     linkedin?: string | null
     generatedEmail?: string | null
+    generatedLinkedin?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
@@ -7552,6 +7573,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin?: NullableStringFieldUpdateOperationsInput | string | null
     generatedEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedLinkedin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
@@ -7566,6 +7588,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin?: NullableStringFieldUpdateOperationsInput | string | null
     generatedEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedLinkedin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
@@ -7580,6 +7603,7 @@ export namespace Prisma {
     email?: string | null
     linkedin?: string | null
     generatedEmail?: string | null
+    generatedLinkedin?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
@@ -7594,6 +7618,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin?: NullableStringFieldUpdateOperationsInput | string | null
     generatedEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedLinkedin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
@@ -7608,6 +7633,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     linkedin?: NullableStringFieldUpdateOperationsInput | string | null
     generatedEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedLinkedin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
@@ -7965,6 +7991,7 @@ export namespace Prisma {
     email?: SortOrder
     linkedin?: SortOrder
     generatedEmail?: SortOrder
+    generatedLinkedin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isDeleted?: SortOrder
@@ -7979,6 +8006,7 @@ export namespace Prisma {
     email?: SortOrder
     linkedin?: SortOrder
     generatedEmail?: SortOrder
+    generatedLinkedin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isDeleted?: SortOrder
@@ -7993,6 +8021,7 @@ export namespace Prisma {
     email?: SortOrder
     linkedin?: SortOrder
     generatedEmail?: SortOrder
+    generatedLinkedin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     isDeleted?: SortOrder

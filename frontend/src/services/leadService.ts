@@ -41,9 +41,6 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 
 export const leadService = {
   searchLeads: async (filters: SearchFilters): Promise<Lead[]> => {
-    // Simulate AI powered search with the filters
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
     // Get leads from both Backend and LocalStorage to mark as saved
     const savedLeads = await leadService.getSavedLeads();
     const savedIds = new Set(savedLeads.map(l => l.id));
@@ -90,7 +87,12 @@ export const leadService = {
           content: item.generatedEmail,
           createdAt: item.createdAt
         }] : [],
-        generatedLinkedIn: []
+        generatedLinkedIn: item.generatedLinkedin ? [{
+          id: crypto.randomUUID(),
+          type: 'linkedin',
+          content: item.generatedLinkedin,
+          createdAt: item.createdAt
+        }] : []
       }));
 
       // Merge avoiding duplicates by ID or company name
@@ -113,10 +115,10 @@ export const leadService = {
   },
 
   saveLead: async (lead: Lead) => {
-    // Always save to local storage as fallback
-    saveToLocalStorage(lead);
-
-    if (USE_MOCK) return lead;
+    if (USE_MOCK) {
+      saveToLocalStorage(lead);
+      return lead;
+    }
 
     try {
       const response = await api.post('/leads', {
@@ -126,7 +128,8 @@ export const leadService = {
         website: lead.website,
         email: lead.contactEmail,
         linkedin: lead.linkedInUrl,
-        generatedEmail: lead.generatedEmails?.[0]?.content || ''
+        generatedEmail: lead.generatedEmails?.[0]?.content || '',
+        generatedLinkedin: lead.generatedLinkedIn?.[0]?.content || ''
       });
       
       const savedLead = {
@@ -135,6 +138,7 @@ export const leadService = {
         isSaved: true
       };
       
+      saveToLocalStorage(savedLead);
       updateInLocalStorage(savedLead);
       return savedLead;
     } catch (e: any) {
@@ -144,12 +148,14 @@ export const leadService = {
   },
 
   removeLead: async (leadId: string) => {
-    removeFromLocalStorage(leadId);
-
-    if (USE_MOCK) return;
+    if (USE_MOCK) {
+      removeFromLocalStorage(leadId);
+      return;
+    }
 
     try {
       await api.delete(`/leads/${leadId}`);
+      removeFromLocalStorage(leadId);
     } catch (e: any) {
       console.error('Backend delete failed:', e.response?.data?.message || e.message || e);
       throw e;
@@ -157,9 +163,10 @@ export const leadService = {
   },
 
   updateLead: async (updatedLead: Lead) => {
-    updateInLocalStorage(updatedLead);
-
-    if (USE_MOCK) return updatedLead;
+    if (USE_MOCK) {
+      updateInLocalStorage(updatedLead);
+      return updatedLead;
+    }
 
     try {
       const response = await api.patch(`/leads/${updatedLead.id}`, {
@@ -168,7 +175,8 @@ export const leadService = {
         website: updatedLead.website,
         email: updatedLead.contactEmail,
         linkedin: updatedLead.linkedInUrl,
-        generatedEmail: updatedLead.generatedEmails?.[0]?.content || ''
+        generatedEmail: updatedLead.generatedEmails?.[0]?.content || '',
+        generatedLinkedin: updatedLead.generatedLinkedIn?.[0]?.content || ''
       });
       
       const lead = {
