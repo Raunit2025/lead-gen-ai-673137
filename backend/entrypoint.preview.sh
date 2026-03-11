@@ -1,11 +1,10 @@
 #!/bin/sh
 
-# This script installs necessary dependencies for a project, generates the prisma client and migrates the database, before starting up. The project directory, path depends on the project path.
+# This script installs necessary dependencies for a project and starts up the server.
 
 PROJECT_DIR="/app/project"
-REQUIRED_FILES="package.json prisma.config.ts tsconfig.json .env"
+REQUIRED_FILES="package.json tsconfig.json .env"
 CHECKSUM_FILE="node_modules/.checksums.md5"
-PRISMA_CHECKSUM_FILE=".prisma-checksums.md5"
 
 # Variable to track the server process ID
 SERVER_PID=""
@@ -14,17 +13,6 @@ SERVER_PID=""
 get_checksum() {
     {
         find . -maxdepth 1 -name "package.json" -type f -exec openssl md5 -r {} \; 2>/dev/null
-        find . -maxdepth 1 -name ".env*" -type f -exec openssl md5 -r {} \; 2>/dev/null
-    } | awk '{print $1}' | sort | openssl md5 -r 2>/dev/null | awk '{print $1}' || echo ""
-}
-
-# Function to get combined checksum of all Prisma-related files
-get_prisma_checksum() {
-    {
-        find . -maxdepth 1 -name "prisma.config.ts" -type f -exec openssl md5 -r {} \; 2>/dev/null
-        find ./src/prisma -name "*.prisma" -type f -exec openssl md5 -r {} \; 2>/dev/null
-        find ./src/prisma -name "seed.ts" -type f -exec openssl md5 -r {} \; 2>/dev/null
-        find ./src/prisma/migrations -type f -exec openssl md5 -r {} \; 2>/dev/null
         find . -maxdepth 1 -name ".env*" -type f -exec openssl md5 -r {} \; 2>/dev/null
     } | awk '{print $1}' | sort | openssl md5 -r 2>/dev/null | awk '{print $1}' || echo ""
 }
@@ -45,42 +33,6 @@ update_checksum() {
         mkdir -p node_modules 2>/dev/null || true
     fi
     echo "$checksum_value" > "$CHECKSUM_FILE" 2>/dev/null || true
-}
-
-# Function to read stored Prisma checksum
-get_stored_prisma_checksum() {
-    if [ -f "$PRISMA_CHECKSUM_FILE" ]; then
-        cat "$PRISMA_CHECKSUM_FILE" 2>/dev/null || echo ""
-    else
-        echo ""
-    fi
-}
-
-# Function to update stored Prisma checksum
-update_prisma_checksum() {
-    checksum_value=$1
-    if [ ! -d "node_modules" ]; then
-        mkdir -p node_modules 2>/dev/null || true
-    fi
-    echo "$checksum_value" > "$PRISMA_CHECKSUM_FILE" 2>/dev/null || true
-}
-
-# Function to run Prisma database commands
-run_prisma_commands() {
-    echo "Running Prisma database commands..."
-    echo "Running dbGenerate..."
-    pnpm dbGenerate || {
-        echo "Warning: dbGenerate failed, but continuing..."
-    }
-    echo "Running db:push..."
-    pnpm db:push || {
-        echo "Warning: db:push failed, but continuing..."
-    }
-    echo "Running db:seed..."
-    pnpm db:seed || {
-        echo "Warning: db:seed failed, but continuing..."
-    }
-    echo "Prisma database commands completed."
 }
 
 # Function to kill child processes of a given PID
@@ -142,17 +94,10 @@ stop_server() {
 
 # Function to start/restart the server
 start_server() {
-    should_run_prisma_commands=$1
-    
     echo "Installing dependencies..."
     pnpm install || {
         echo "Warning: pnpm install failed, but continuing..."
     }
-
-    # Run Prisma commands if needed
-    if [ "$should_run_prisma_commands" = "true" ]; then
-        run_prisma_commands
-    fi
 
     # Stop existing server if running
     stop_server
@@ -210,10 +155,9 @@ while true; do
                 sleep 10
                 continue
             }
-            # First time setup - always run Prisma commands
-            start_server "true"
+            # First time setup
+            start_server
             update_checksum "$(get_checksum)"
-            update_prisma_checksum "$(get_prisma_checksum)"
             sleep 10
         else
             echo "Waiting for project files in '$PROJECT_PATH' to be created..."
@@ -230,11 +174,8 @@ while true; do
         
         OLD_CHECKSUM=$(get_stored_checksum)
         NEW_CHECKSUM=$(get_checksum)
-        OLD_PRISMA_CHECKSUM=$(get_stored_prisma_checksum)
-        NEW_PRISMA_CHECKSUM=$(get_prisma_checksum)
         
         SHOULD_RESTART=false
-        SHOULD_RUN_PRISMA=false
         
         # Check if package.json or .env files changed
         if [ -n "$NEW_CHECKSUM" ] && [ "$OLD_CHECKSUM" != "$NEW_CHECKSUM" ]; then
@@ -243,17 +184,9 @@ while true; do
             update_checksum "$NEW_CHECKSUM"
         fi
         
-        # Check if Prisma files changed
-        if [ -n "$NEW_PRISMA_CHECKSUM" ] && [ "$OLD_PRISMA_CHECKSUM" != "$NEW_PRISMA_CHECKSUM" ]; then
-            echo "Prisma files have changed."
-            SHOULD_RESTART=true
-            SHOULD_RUN_PRISMA=true
-            update_prisma_checksum "$NEW_PRISMA_CHECKSUM"
-        fi
-        
         if [ "$SHOULD_RESTART" = true ]; then
             echo "Server will be restarted."
-            start_server "$SHOULD_RUN_PRISMA"
+            start_server
         fi
 
         sleep 10

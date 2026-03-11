@@ -3,8 +3,5 @@ packages:
   - 'backend'
 
 onlyBuiltDependencies:
-  - '@prisma/client'
-  - '@prisma/engines'
   - '@scarf/scarf'
   - bcrypt
-  - prisma

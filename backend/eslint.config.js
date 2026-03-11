@@ -71,7 +71,6 @@ export default defineConfig([
         '**/*test.ts',
         '__mocks__/**',
         '**/swagger/swaggerSpecs.ts',
-        '**/*.cjs',
-        'prisma.config.ts'
+        '**/*.cjs'
     ])
 ]);

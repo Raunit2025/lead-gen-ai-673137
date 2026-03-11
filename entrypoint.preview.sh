@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# This script installs necessary dependencies for a project, generates the prisma client and migrates the database, before starting up. The project directory, path depends on the project path.
+# This script installs necessary dependencies for the monorepo and starts up the project.
 
 PROJECT_DIR="/app/project"
-REQUIRED_FILES="package.json vite.config.ts tsconfig.json"
+REQUIRED_FILES="package.json pnpm-workspace.yaml"
 CHECKSUM_FILE="node_modules/.checksums.md5"
 
 # Variable to track the server process ID
@@ -13,7 +13,7 @@ SERVER_PID=""
 get_checksum() {
     {
         find . -maxdepth 1 -name "package.json" -type f -exec openssl md5 -r {} \; 2>/dev/null
-        find . -maxdepth 1 -name ".env*" -type f -exec openssl md5 -r {} \; 2>/dev/null
+        find . -maxdepth 1 -name "pnpm-workspace.yaml" -type f -exec openssl md5 -r {} \; 2>/dev/null
     } | awk '{print $1}' | sort | openssl md5 -r 2>/dev/null | awk '{print $1}' || echo ""
 }
 
@@ -45,32 +45,16 @@ kill_children() {
     done
 }
 
-# Function to kill processes using a specific port
-kill_port() {
-    port=$1
-    pids=$(lsof -ti:$port 2>/dev/null || true)
-    if [ -n "$pids" ]; then
-        echo "Found processes still using port $port, killing..."
-        for pid in $pids; do
-            kill -KILL $pid 2>/dev/null || true
-        done
-    fi
-}
-
-# Function to stop server process and cleanup
+# Function to stop process and cleanup
 stop_server() {
     if [ -z "$SERVER_PID" ]; then
         return
     fi
 
-    echo "Waiting for existing server process (PID: $SERVER_PID) to be killed..."
-    KILLED_PID=$SERVER_PID
-
-    # Step 1: Gracefully kill children then parent
+    echo "Waiting for existing process (PID: $SERVER_PID) to be killed..."
     kill_children "$SERVER_PID" "TERM"
     kill -TERM $SERVER_PID 2>/dev/null || true
 
-    # Step 2: Wait for graceful shutdown with timeout
     timeout=10
     count=0
     while kill -0 $SERVER_PID 2>/dev/null && [ $count -lt $timeout ]; do
@@ -78,50 +62,30 @@ stop_server() {
         count=$((count + 1))
     done
 
-    # Step 3: Force kill if still running
     if kill -0 $SERVER_PID 2>/dev/null; then
         echo "Process did not terminate gracefully, forcing kill..."
         kill_children "$SERVER_PID" "KILL"
         kill -KILL $SERVER_PID 2>/dev/null || true
         sleep 1
     fi
-
-    # Step 4: Cleanup any orphaned processes on the port
-    kill_port 5000
-
-    echo "Previous server process (PID: $KILLED_PID) killed."
 }
 
-# Function to start/restart the server
+# Function to start/restart the processes
 start_server() {
     echo "Installing dependencies..."
     pnpm install || {
         echo "Warning: pnpm install failed, but continuing..."
     }
 
-    # Stop existing server if running
+    # Stop existing processes if running
     stop_server
 
-    # Start new server instance
-    echo "Starting server..."
-    if [ -n "$START_COMMAND" ]; then
-        echo "Running START_COMMAND: $START_COMMAND"
-        eval "$START_COMMAND" || {
-            echo "Warning: START_COMMAND ($START_COMMAND) failed, but continuing..."
-        } &
-    else
-        echo "Running pnpm dev"
-        pnpm dev || {
-            echo "Warning: pnpm dev failed, but continuing..."
-        } &
-    fi
+    # Start new processes
+    echo "Starting project..."
+    pnpm dev &
 
     SERVER_PID=$!
-    if [ -n "$SERVER_PID" ]; then
-        echo "Server started with PID: $SERVER_PID"
-    else
-        echo "Warning: Server start command may have failed, but continuing..."
-    fi
+    echo "Project started with PID: $SERVER_PID"
 }
 
 # Consolidated main loop
@@ -165,7 +129,7 @@ while true; do
         fi
     fi
 
-    # Monitor for changes after files are found
+    # Monitor for changes
     if [ "$FILES_FOUND" = true ]; then
         rsync -a --exclude 'node_modules' ${PROJECT_PATH}/ ${PROJECT_DIR} || {
             echo "Warning: rsync failed during monitoring, but continuing..."
@@ -175,7 +139,7 @@ while true; do
         NEW_CHECKSUM=$(get_checksum)
         
         if [ -n "$NEW_CHECKSUM" ] && [ "$OLD_CHECKSUM" != "$NEW_CHECKSUM" ]; then
-            echo "Monitored files have changed. Server will be restarted."
+            echo "Monitored files have changed. Project will be restarted."
             update_checksum "$NEW_CHECKSUM"
             start_server
         fi

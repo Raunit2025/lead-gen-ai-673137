@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This script installs necessary dependencies for a project, generates the prisma client and migrates the database, before starting up. The project directory, path depends on the project path.
+# This script installs necessary dependencies for a project and starts up the development server.
 
 PROJECT_DIR="/app/project"
 REQUIRED_FILES="package.json vite.config.ts tsconfig.json"
