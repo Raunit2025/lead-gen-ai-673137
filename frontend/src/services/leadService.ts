@@ -139,7 +139,6 @@ export const leadService = {
       };
       
       saveToLocalStorage(savedLead);
-      updateInLocalStorage(savedLead);
       return savedLead;
     } catch (e: any) {
       console.error('Backend save failed:', e.response?.data?.message || e.message || e);
@@ -197,14 +196,15 @@ export const leadService = {
   },
 
   exportToCSV: (leads: Lead[]) => {
-    const headers = ['Company Name', 'Industry', 'Website', 'Email', 'LinkedIn', 'Generated Email'];
+    const headers = ['Company Name', 'Industry', 'Website', 'Email', 'LinkedIn', 'Generated Email', 'Generated LinkedIn'];
     const rows = leads.map(l => [
       l.companyName,
       l.industry,
       l.website,
       l.contactEmail,
       l.linkedInUrl,
-      l.generatedEmails?.[0]?.content || ''
+      l.generatedEmails?.[0]?.content || '',
+      l.generatedLinkedIn?.[0]?.content || ''
     ]);
 
     const csvContent = [
