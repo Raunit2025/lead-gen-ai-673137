@@ -126,6 +126,9 @@ export async function unlinkIdentity(c) {
     if (!userId) {
         throw new ApiError(401, 'Unauthorized');
     }
+    if (!provider) {
+        throw new ApiError(400, 'Provider is required');
+    }
     try {
         await userService.unlinkIdentity(userId, provider);
         return c.json({ message: 'Identity unlinked successfully' });
