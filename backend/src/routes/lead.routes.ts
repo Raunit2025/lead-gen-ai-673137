@@ -1,7 +1,7 @@
-import { Hono } from 'hono';
 import * as leadController from '../controllers/leadController.ts';
 import { authMiddleware } from '../middlewares/authMiddleware.ts';
 import catchAsync from '../utils/catchAsync.ts';
+import { Hono } from 'hono';
 
 const leadRoutes = new Hono();
 

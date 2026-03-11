@@ -1,10 +1,10 @@
 import { errorHandler } from "./middlewares/error.js";
+import authRoutes from "./routes/auth.routes.js";
+import leadRoutes from "./routes/lead.routes.js";
 import ApiError from "./utils/ApiError.js";
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import authRoutes from "./routes/auth.routes.js";
-import leadRoutes from "./routes/lead.routes.js";
 const app = new Hono();
 // set security HTTP headers only in production
 if (process.env.NODE_ENV === 'production')

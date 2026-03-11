@@ -1,31 +1,56 @@
-import prisma from '../client.ts';
+import supabase from '../client.ts';
 import { User } from '../types/user.ts';
 import bcrypt from 'bcrypt';
 
 /**
- * User Service - Simplified for LeadGen AI
+ * User Service - Supabase implementation
  */
 
+const toCamelCase = (user: any): User | null => {
+    if (!user) return null;
+    return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        password: user.password,
+        isDeleted: user.is_deleted,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at
+    };
+};
+
 /**
- * Find or create user - modified to support simpler schema
+ * Get user by ID
  */
 export async function getUserById(userId: string): Promise<User | null> {
-    return await prisma.user.findFirst({
-        where: { id: userId, isDeleted: false }
-    });
+    const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .eq('is_deleted', false)
+        .maybeSingle();
+
+    if (error) return null;
+    return toCamelCase(data);
 }
 
 /**
  * Get user by email
  */
 export async function getUserByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findFirst({
-        where: { email, isDeleted: false }
-    });
+    const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .eq('is_deleted', false)
+        .maybeSingle();
+
+    if (error) return null;
+    return toCamelCase(data);
 }
 
 /**
- * Register user with email and password (simplified)
+ * Register user with email and password
  */
 export async function registerWithEmailPassword(email: string, password: string, name?: string): Promise<User> {
     // Check if user already exists
@@ -37,27 +62,27 @@ export async function registerWithEmailPassword(email: string, password: string,
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user with email/password directly on model
-    const newUser = await prisma.user.create({
-        data: {
+    const { data, error } = await supabase
+        .from('users')
+        .insert({
             email,
             name: name || null,
             password: passwordHash,
-            isDeleted: false
-        }
-    });
+            is_deleted: false
+        })
+        .select()
+        .single();
 
-    return newUser;
+    if (error) throw new Error(error.message);
+    return toCamelCase(data)!;
 }
 
 /**
- * Authenticate user with email and password (simplified)
+ * Authenticate user with email and password
  */
 export async function authenticateWithEmailPassword(email: string, password: string): Promise<User> {
     // Find user
-    const user = await prisma.user.findFirst({
-        where: { email, isDeleted: false }
-    });
+    const user = await getUserByEmail(email);
 
     if (!user || !user.password) {
         throw new Error('Invalid email or password');
@@ -74,67 +99,76 @@ export async function authenticateWithEmailPassword(email: string, password: str
 }
 
 /**
- * Get user identities - for backward compatibility if needed
+ * Get user identities
  */
 export async function getUserIdentities(userId: string) {
-    return await prisma.userIdentity.findMany({
-        where: { userId, isDeleted: false }
-    });
+    const { data, error } = await supabase
+        .from('user_identities')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_deleted', false);
+
+    if (error) return [];
+    return data;
 }
 
 /**
- * Unlink identity - for backward compatibility
+ * Unlink identity
  */
 export async function unlinkIdentity(userId: string, provider: string): Promise<void> {
-    await prisma.userIdentity.updateMany({
-        where: {
-            userId,
-            provider,
-            isDeleted: false
-        },
-        data: {
-            isDeleted: true
-        }
-    });
+    const { error } = await supabase
+        .from('user_identities')
+        .update({ is_deleted: true })
+        .eq('user_id', userId)
+        .eq('provider', provider)
+        .eq('is_deleted', false);
+
+    if (error) throw new Error(error.message);
 }
 
 /**
- * findOrCreateUser - kept for compatibility with OAuth controllers if they still use it
+ * findOrCreateUser
  */
-export async function findOrCreateUser(profile: any, metadata?: any): Promise<User> {
-    const existingUser = await prisma.user.findFirst({
-        where: { email: profile.email, isDeleted: false }
-    });
+export async function findOrCreateUser(profile: any): Promise<User> {
+    const existingUser = await getUserByEmail(profile.email);
 
     if (existingUser) return existingUser;
 
-    return await prisma.user.create({
-        data: {
+    const { data, error } = await supabase
+        .from('users')
+        .insert({
             email: profile.email,
             name: profile.name || null,
             password: '', // OAuth users have no password
-            isDeleted: false
-        }
-    });
+            is_deleted: false
+        })
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+    return toCamelCase(data)!;
 }
 
 /**
- * findOrCreateUserByPhone - for compatibility with phone OTP
+ * findOrCreateUserByPhone
  */
 export async function findOrCreateUserByPhone(phone: string, name?: string): Promise<User> {
     const placeholderEmail = `${phone.replace(/[^0-9]/g, '')}@phone.local`;
-    const existingUser = await prisma.user.findFirst({
-        where: { email: placeholderEmail, isDeleted: false }
-    });
+    const existingUser = await getUserByEmail(placeholderEmail);
 
     if (existingUser) return existingUser;
 
-    return await prisma.user.create({
-        data: {
+    const { data, error } = await supabase
+        .from('users')
+        .insert({
             email: placeholderEmail,
             name: name || null,
             password: '', // Phone users have no password
-            isDeleted: false
-        }
-    });
+            is_deleted: false
+        })
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+    return toCamelCase(data)!;
 }

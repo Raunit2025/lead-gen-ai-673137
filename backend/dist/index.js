@@ -1,17 +1,10 @@
 import app from "./app.js";
-import prisma from "./client.js";
 import { serve } from '@hono/node-server';
 import dotenv from 'dotenv';
 let server;
 dotenv.config();
-console.log('Starting');
-async function main() {
-    try {
-        await prisma.$connect();
-    }
-    catch (error) {
-        process.exit(1);
-    }
+console.log('Starting server');
+function main() {
     server = serve({
         fetch: app.fetch,
         port: (process.env.PORT || 3000)
@@ -37,5 +30,4 @@ async function main() {
         }
     });
 }
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();

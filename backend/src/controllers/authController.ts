@@ -1,6 +1,6 @@
+import * as otpService from '../services/otpService.ts';
 import * as tokenService from '../services/tokenService.ts';
 import * as userService from '../services/userService.ts';
-import * as otpService from '../services/otpService.ts';
 import ApiError from '../utils/ApiError.ts';
 import { validateEmailPassword } from '../utils/emailPassword.ts';
 import { OAuth, OAuthProvider } from '@uptiqai/integrations-sdk';
@@ -49,15 +49,8 @@ export async function googleCallback(c: Context) {
         const googleOAuth = new OAuth({ provider: OAuthProvider.Google });
         const userProfile = await googleOAuth.handleOAuthCallback({ code, state });
 
-        // 2. Extract metadata to store (profile picture, locale, etc.)
-        const metadata = {
-            picture: userProfile.picture,
-            locale: userProfile.rawProfile?.locale,
-            lastLoginAt: new Date().toISOString()
-        };
-
-        // 3. Find or create user in database with metadata
-        const user = await userService.findOrCreateUser(userProfile, metadata);
+        // 3. Find or create user in database
+        const user = await userService.findOrCreateUser(userProfile);
 
         // 4. Generate JWT tokens
         const tokens = tokenService.generateTokens(user.id, user.email);
@@ -247,8 +240,6 @@ export async function login(c: Context) {
     }
 }
 
-
-
 /**
  * POST /auth/phone/send-otp
  * Send OTP to phone number via WhatsApp
@@ -262,7 +253,7 @@ export async function sendPhoneOTP(c: Context) {
         if (!phone) {
             throw new ApiError(400, 'Phone number is required');
         }
-    
+
         if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
             throw new ApiError(400, 'Invalid phone number format. Use international format: +1234567890');
         }
@@ -273,7 +264,6 @@ export async function sendPhoneOTP(c: Context) {
             message: 'OTP sent successfully to WhatsApp',
             expiresIn: 600 // 10 minutes in seconds
         });
-
     } catch (error) {
         if (error instanceof Error) {
             throw new ApiError(400, error.message);

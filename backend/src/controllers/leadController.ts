@@ -1,19 +1,46 @@
-import { Context } from 'hono';
-import prisma from '../client.ts';
-import catchAsync from '../utils/catchAsync.ts';
+import supabase from '../client.ts';
 import ApiError from '../utils/ApiError.ts';
+import catchAsync from '../utils/catchAsync.ts';
+import { Context } from 'hono';
+
+/**
+ * Helper to map snake_case database columns to camelCase frontend fields
+ */
+const toCamelCase = (lead: any) => {
+    if (!lead) return null;
+    return {
+        id: lead.id,
+        userId: lead.user_id,
+        companyName: lead.company_name,
+        industry: lead.industry,
+        website: lead.website,
+        email: lead.email,
+        linkedin: lead.linkedin,
+        generatedEmail: lead.generated_email,
+        generatedLinkedin: lead.generated_linkedin,
+        isDeleted: lead.is_deleted,
+        createdAt: lead.created_at,
+        updatedAt: lead.updated_at
+    };
+};
 
 /**
  * Get all saved leads for the current user
  */
 export const getSavedLeads = catchAsync(async (c: Context) => {
     const userId = c.get('userId');
-    
-    const leads = await prisma.savedLead.findMany({
-        where: { userId, isDeleted: false }
-    });
-    
-    return c.json(leads);
+
+    const { data, error } = await supabase
+        .from('saved_leads')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_deleted', false);
+
+    if (error) {
+        throw new ApiError(500, error.message);
+    }
+
+    return c.json(data?.map(toCamelCase) || []);
 });
 
 /**
@@ -22,89 +49,117 @@ export const getSavedLeads = catchAsync(async (c: Context) => {
 export const saveLead = catchAsync(async (c: Context) => {
     const userId = c.get('userId');
     const body = await c.req.json();
-    
+
     const { id, companyName, industry, website, email, linkedin, generatedEmail, generatedLinkedin } = body;
-    
+
     if (!companyName) {
         throw new ApiError(400, 'Company name is required');
     }
 
-    // Use upsert-like logic but with ownership check
+    // Validate if ID is a valid UUID
     const isValidId = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-    const leadData = {
-        userId,
-        companyName,
+    const leadData: any = {
+        user_id: userId,
+        company_name: companyName,
         industry,
         website,
         email,
         linkedin,
-        generatedEmail,
-        generatedLinkedin,
-        isDeleted: false,
-        updatedAt: new Date()
+        generated_email: generatedEmail,
+        generated_linkedin: generatedLinkedin,
+        is_deleted: false,
+        updated_at: new Date().toISOString()
     };
 
     let lead;
     if (isValidId) {
         // Check if lead exists and who it belongs to
-        const existingLead = await prisma.savedLead.findUnique({
-            where: { id }
-        });
+        const { data: existingLead } = await supabase.from('saved_leads').select('*').eq('id', id).maybeSingle();
 
         if (existingLead) {
-            if (existingLead.userId === userId) {
+            if (existingLead.user_id === userId) {
                 // It belongs to the current user, update it
-                lead = await prisma.savedLead.update({
-                    where: { id },
-                    data: { ...leadData, updatedAt: new Date() }
-                });
+                const { data: updatedData, error: updateError } = await supabase
+                    .from('saved_leads')
+                    .update(leadData)
+                    .eq('id', id)
+                    .select()
+                    .single();
+
+                if (updateError) throw new ApiError(500, updateError.message);
+                lead = updatedData;
             } else {
-                // Collision: ID exists but belongs to someone else (likely mock data)
+                // Collision: ID exists but belongs to someone else
                 // Create a new record for this user with a fresh ID
-                lead = await prisma.savedLead.create({
-                    data: { ...leadData, id: undefined }
-                });
+                const { data: newData, error: insertError } = await supabase
+                    .from('saved_leads')
+                    .insert(leadData)
+                    .select()
+                    .single();
+
+                if (insertError) throw new ApiError(500, insertError.message);
+                lead = newData;
             }
         } else {
-            // Doesn't exist, create with provided ID
-            try {
-                lead = await prisma.savedLead.create({
-                    data: { ...leadData, id }
-                });
-            } catch (error: any) {
-                // Handle race condition where another request might have created it
-                if (error.code === 'P2002') {
-                    // Check ownership of the lead that was just created
-                    const existing = await prisma.savedLead.findUnique({
-                        where: { id }
-                    });
-                    
-                    if (existing && existing.userId === userId) {
+            // Doesn't exist, try insert with provided ID
+            leadData.id = id;
+            const { data: newData, error: insertError } = await supabase
+                .from('saved_leads')
+                .insert(leadData)
+                .select()
+                .single();
+
+            if (insertError) {
+                // Handle unique constraint violation (Postgres error code 23505)
+                if (insertError.code === '23505') {
+                    const { data: existing } = await supabase
+                        .from('saved_leads')
+                        .select('*')
+                        .eq('id', id)
+                        .maybeSingle();
+
+                    if (existing && existing.user_id === userId) {
                         // It belongs to us, update it
-                        lead = await prisma.savedLead.update({
-                            where: { id },
-                            data: { ...leadData, updatedAt: new Date() }
-                        });
+                        const { data: updatedData, error: updateError } = await supabase
+                            .from('saved_leads')
+                            .update(leadData)
+                            .eq('id', id)
+                            .select()
+                            .single();
+                        if (updateError) throw new ApiError(500, updateError.message);
+                        lead = updatedData;
                     } else {
                         // Collision or belongs to someone else, create with fresh ID
-                        lead = await prisma.savedLead.create({
-                            data: { ...leadData, id: undefined }
-                        });
+                        delete leadData.id;
+                        const { data: newData2, error: insertError2 } = await supabase
+                            .from('saved_leads')
+                            .insert(leadData)
+                            .select()
+                            .single();
+                        if (insertError2) throw new ApiError(500, insertError2.message);
+                        lead = newData2;
                     }
                 } else {
-                    throw error;
+                    throw new ApiError(500, insertError.message);
                 }
+            } else {
+                lead = newData;
             }
         }
     } else {
         // No valid ID provided, create new
-        lead = await prisma.savedLead.create({
-            data: { ...leadData, id: undefined }
-        });
+        const { data: newData, error: insertError } = await supabase
+            .from('saved_leads')
+            .insert(leadData)
+            .select()
+            .single();
+
+        if (insertError) throw new ApiError(500, insertError.message);
+        lead = newData;
     }
-    
-    return c.json(lead);
+
+    return c.json(toCamelCase(lead));
 });
 
 /**
@@ -113,13 +168,17 @@ export const saveLead = catchAsync(async (c: Context) => {
 export const removeLead = catchAsync(async (c: Context) => {
     const userId = c.get('userId');
     const leadId = c.req.param('id');
-    
-    // Use updateMany for atomicity and implicit ownership check
-    await prisma.savedLead.updateMany({
-        where: { id: leadId, userId },
-        data: { isDeleted: true }
-    });
-    
+
+    const { error } = await supabase
+        .from('saved_leads')
+        .update({ is_deleted: true })
+        .eq('id', leadId)
+        .eq('user_id', userId);
+
+    if (error) {
+        throw new ApiError(500, error.message);
+    }
+
     return c.json({ message: 'Lead removed successfully' });
 });
 
@@ -130,31 +189,41 @@ export const updateLead = catchAsync(async (c: Context) => {
     const userId = c.get('userId');
     const leadId = c.req.param('id');
     const body = await c.req.json();
-    
+
     const { companyName, industry, website, email, linkedin, generatedEmail, generatedLinkedin } = body;
-    
+
     // Check ownership and existence first
-    const lead = await prisma.savedLead.findFirst({
-        where: { id: leadId, userId, isDeleted: false }
-    });
-    
-    if (!lead) {
+    const { data: lead, error: fetchError } = await supabase
+        .from('saved_leads')
+        .select('*')
+        .eq('id', leadId)
+        .eq('user_id', userId)
+        .eq('is_deleted', false)
+        .maybeSingle();
+
+    if (fetchError || !lead) {
         throw new ApiError(404, 'Lead not found');
     }
-    
-    const updatedLead = await prisma.savedLead.update({
-        where: { id: leadId },
-        data: {
-            companyName,
+
+    const { data: updatedLead, error: updateError } = await supabase
+        .from('saved_leads')
+        .update({
+            company_name: companyName,
             industry,
             website,
             email,
             linkedin,
-            generatedEmail,
-            generatedLinkedin,
-            updatedAt: new Date()
-        }
-    });
-    
-    return c.json(updatedLead);
+            generated_email: generatedEmail,
+            generated_linkedin: generatedLinkedin,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', leadId)
+        .select()
+        .single();
+
+    if (updateError) {
+        throw new ApiError(500, updateError.message);
+    }
+
+    return c.json(toCamelCase(updatedLead));
 });

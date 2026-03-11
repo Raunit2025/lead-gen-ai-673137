@@ -1,7 +1,7 @@
-import { Hono } from 'hono';
 import * as leadController from "../controllers/leadController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import catchAsync from "../utils/catchAsync.js";
+import { Hono } from 'hono';
 const leadRoutes = new Hono();
 // All lead routes require authentication
 leadRoutes.use('*', authMiddleware);

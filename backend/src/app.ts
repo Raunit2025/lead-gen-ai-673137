@@ -1,11 +1,10 @@
 import { errorHandler } from './middlewares/error.ts';
+import authRoutes from './routes/auth.routes.ts';
+import leadRoutes from './routes/lead.routes.ts';
 import ApiError from './utils/ApiError.ts';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-
-import authRoutes from './routes/auth.routes.ts';
-import leadRoutes from './routes/lead.routes.ts';
 
 const app = new Hono();
 

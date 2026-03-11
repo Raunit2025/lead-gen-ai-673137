@@ -1,6 +1,6 @@
+import * as otpService from "../services/otpService.js";
 import * as tokenService from "../services/tokenService.js";
 import * as userService from "../services/userService.js";
-import * as otpService from "../services/otpService.js";
 import ApiError from "../utils/ApiError.js";
 import { validateEmailPassword } from "../utils/emailPassword.js";
 import { OAuth, OAuthProvider } from '@uptiqai/integrations-sdk';
@@ -40,14 +40,8 @@ export async function googleCallback(c) {
         // 1. Use integration layer to exchange code for user profile
         const googleOAuth = new OAuth({ provider: OAuthProvider.Google });
         const userProfile = await googleOAuth.handleOAuthCallback({ code, state });
-        // 2. Extract metadata to store (profile picture, locale, etc.)
-        const metadata = {
-            picture: userProfile.picture,
-            locale: userProfile.rawProfile?.locale,
-            lastLoginAt: new Date().toISOString()
-        };
-        // 3. Find or create user in database with metadata
-        const user = await userService.findOrCreateUser(userProfile, metadata);
+        // 3. Find or create user in database
+        const user = await userService.findOrCreateUser(userProfile);
         // 4. Generate JWT tokens
         const tokens = tokenService.generateTokens(user.id, user.email);
         // 5. Return tokens to frontend (or redirect with tokens in URL)
